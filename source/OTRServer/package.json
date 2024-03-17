@@ -2,11 +2,11 @@
   "name": "otrserver",
   "version": "1.0.0",
   "description": "The server for the on the run game.",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Nathan Webb, James Hardy",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.3"
