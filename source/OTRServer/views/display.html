@@ -3,11 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     <title>OnTheRun Display</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            max-width: 100vw;
+            max-height: 100vh;
+            font-family: "Roboto Mono", monospace;
+        }
+
+        #display-wrapper {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            background-color: black;
+            color: white;
+            align-items: center;
+            justify-content: center;
+            font-size: 10em;
+        }
+        
+        #placeholder {
+            position: absolute;
+        }
+
+        #canvas-parent {
+            display: flex;
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
+
+    </style>
+    <script src="pixi.js"></script>
+
 </head>
 <body>
-    OnTheRun Display
-    <script src="pixi.js"></script>
-    <script src="display_render.js"></script>
+    <div id="display-wrapper">
+        <div id="placeholder">Loading Display...</div>
+        <div id="canvas-parent"></div>
+    </div>
+    <script src="display_render.js" type="module"></script>
 </body>
 </html>
