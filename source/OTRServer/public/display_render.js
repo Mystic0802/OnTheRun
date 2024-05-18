@@ -15,6 +15,14 @@ window.addEventListener("resize", () => {
   app.renderer.resize(cnv.offsetWidth, cnv.offsetHeight);
 });
 
+await PIXI.Assets.load("../fonts/RobotoMono-Bold.ttf");
+await PIXI.Assets.load("../images/BlockBackground.png");
+await PIXI.Assets.load("../images/BlockBorder.png");
+await PIXI.Assets.load("../images/PlayerNameTexture.png");
+await PIXI.Assets.load("../images/MoneyBackground.png");
+await PIXI.Assets.load("../images/MoneyBorder.png");
+await PIXI.Assets.load("../images/MoneyTexture.png");
+
 // ====================================================================================
 // RENDERER
 // ====================================================================================
@@ -28,22 +36,19 @@ class Renderer {
 
   add_element(__element) {
     try {
-        let sprite = __element.sprite
-        if (sprite == null) {
-            throw new Error("No Sprite found on element.")
-        }
-        this.elements.push(__element)
-        this.app.stage.addChild(sprite)
+      let sprite = __element.sprite;
+      if (sprite == null) {
+        throw new Error("No Sprite found on element.");
+      }
+      this.elements.push(__element);
+      this.app.stage.addChild(sprite);
+    } catch (e) {
+      console.log(e);
     }
-    catch (e) { 
-        console.log(e)
-    }
-
   }
 
   remove_element(__element) {
-    console.log("REMOVE ELEMENT")
-
+    console.log("REMOVE ELEMENT");
   }
 
   render_elements(__frame_timestamp) {
@@ -63,58 +68,72 @@ class Renderer {
 }
 
 // ====================================================================================
-// ELEMENTS
+// GENERIC ELEMENTS
 // ====================================================================================
 
-// Render Order:
-// Background, Texture Sprite, Inner, Stroke
-
-
-await PIXI.Assets.load("../BlockBackground.png");
-// let block_background = PIXI.Sprite.from("../BlockBackground.png");
-
-await PIXI.Assets.load("../BlockBorder.png");
-
-await PIXI.Assets.load("../PlayerNameTexture.png");
-let player_name_texture = PIXI.Sprite.from("../PlayerNameTexture.png");
-
 class Block {
-  constructor(__init_coords, __size, __texture_sprite, __inner) {
+  constructor(__init_coords, __size, __inner, __texture_sprite, __block_border, __background) {
     /***
-     * @param __init_coords: (x, y) (tuple). Initial coordinates of the block, top-left positioned.
-     * @param __size: (x, y) (tuple). Size of the block.
+     * @param __init_coords: (x, y) (array tuple). Initial coordinates of the block, top-left positioned.
+     * @param __size: (x, y) (array tuple). Size of the block.
      * @param __texture_sprite: Texture to use inside of the block's borders/stroke.
      * @param __inner: Inner elements.
+     * @param __block_border: Texture to use for the block's border. This will normally be a coloured squircle or rectangle.
+     * @param __background: Texture to use for the block's background. This will normally be a metallic squircle or rectangle.  
      */
-    this.background = PIXI.Sprite.from("../BlockBackground.png");
+    // Set all the variables in case we need them later.
+    this.background = __background
+    this.border = __block_border
     this.texture_sprite = __texture_sprite;
-    this.border = PIXI.Sprite.from("../BlockBorder.png");
     this.inner = __inner;
-    this.x = __init_coords[0]
-    this.y = __init_coords[1]
-    this.w = __size[0]
-    this.h = __size[1]
-    // Define Render Order for Block
-    let block = new PIXI.Container() 
-    block.addChild(this.background)
-    block.addChild(this.texture_sprite)
-    // block.addChild(this.inner)
-    block.addChild(this.border)
+    this.x = __init_coords[0];
+    this.y = __init_coords[1];
+    this.w = __size[0];
+    this.h = __size[1];
 
-    this.sprite = block
+    // Sizes and Decorative Positioning
+    this.background.height = this.h;
+    this.background.width = this.w;
+    this.border.height = this.h - 8;
+    this.border.width = this.w - 8;
+    this.texture_sprite.height = this.h - 8;
+    this.texture_sprite.width = this.w - 8;
+    this.border.position.set(4, 4);
+    this.texture_sprite.position.set(4, 4);
+
+    // Define Render Order for Block
+    // Basically just add everything together now it has been initialized.
+    let block = new PIXI.Container();
+    block.addChild(this.background);
+    block.addChild(this.texture_sprite);
+
+    try {
+      // + 4 accounts for border padding
+      // DEFINE SOME TEXT SCALING FUNCTION USING A SCALAR WITH A CONSTANT REDUCTION
+      this.inner.width = (this.inner.width / cnv.offsetWidth > 0.12) ? cnv.offsetWidth * 0.12 : this.inner.width
+      this.inner.position.set(
+        this.w / 2 - this.inner.width / 2 + 4,
+        this.h / 2 - this.inner.height / 2 + 4
+      );
+      block.addChild(this.inner);
+    } catch (e) {
+      console.error(`Could not add inner element: ${e}`);
+    }
+    block.addChild(this.border);
+
+    // Set relative position of the entire block
+    block.position.set(__init_coords[0], __init_coords[1]);
+    this.sprite = block;
   }
 
   set sprite(__sprite) {
-    this.container = __sprite
-
+    this.container = __sprite;
   }
 
   get sprite() {
-    console.log(this.container)
-    return this.container
+    return this.container;
   }
 }
-
 
 // ====================================================================================
 // RUNTIME INIT
@@ -127,17 +146,73 @@ app.ticker.add((ticker) => {
 });
 
 // ====================================================================================
-// STATIC ELEMENTS INITIALIZATION
+// STATIC ELEMENTS INITIALIZATION | CREATE THE PLAYER BLOCKS!
 // ====================================================================================
 
+console.log(cnv.offsetWidth)
+
+const defaultTextStyle = new PIXI.TextStyle({
+  fontFamily: "Roboto Mono",
+  fill: "#FFFFFF",
+  x: 100,
+  y: 100,
+  // fontSize: 48
+  // Results in something that is about 48 for most sizes.
+  fontSize: cnv.offsetWidth * 0.022
+});
+
+let layout_columns = 16;
+let layout_rows = 12;
+let column_value = cnv.offsetWidth / layout_columns;
+let row_value = cnv.offsetHeight / layout_rows;
 
 let player_one = new Block(
-    (cnv.offsetWidth / 2, cnv.offsetHeight / 2),
-    (185, 73),
-    player_name_texture,
-    null
+  [column_value * 1, row_value * 10],
+  [column_value * 2.5, row_value * 1.5],
+  new PIXI.Text("GEORGIA", defaultTextStyle),
+  PIXI.Sprite.from("../images/PlayerNameTexture.png"),
+  PIXI.Sprite.from("../images/BlockBorder.png"),
+  PIXI.Sprite.from("../images/BlockBackground.png")
+);
+
+let player_two = new Block(
+  [column_value * 3.5, row_value * 10],
+  [column_value * 2.5, row_value * 1.5],
+  new PIXI.Text("NATHANIEL", defaultTextStyle),
+  PIXI.Sprite.from("../images/PlayerNameTexture.png"),
+  PIXI.Sprite.from("../images/BlockBorder.png"),
+  PIXI.Sprite.from("../images/BlockBackground.png")
+);
+
+let player_three = new Block(
+  [column_value * 10, row_value * 10],
+  [column_value * 2.5, row_value * 1.5],
+  new PIXI.Text("JAMES", defaultTextStyle),
+  PIXI.Sprite.from("../images/PlayerNameTexture.png"),
+  PIXI.Sprite.from("../images/BlockBorder.png"),
+  PIXI.Sprite.from("../images/BlockBackground.png")
+);
+
+let player_four = new Block(
+  [column_value * 12.5, row_value * 10],
+  [column_value * 2.5, row_value * 1.5],
+  new PIXI.Text("ANGUS", defaultTextStyle),
+  PIXI.Sprite.from("../images/PlayerNameTexture.png"),
+  PIXI.Sprite.from("../images/BlockBorder.png"),
+  PIXI.Sprite.from("../images/BlockBackground.png")
+);
+
+let money_value = new Block(
+  [column_value*6, row_value*9.75],
+  [column_value*4, row_value*2],
+  new PIXI.Text("£100,000", defaultTextStyle),
+  PIXI.Sprite.from("../images/MoneyTexture.png"),
+  PIXI.Sprite.from("../images/MoneyBorder.png"),
+  PIXI.Sprite.from("../images/MoneyBackground")
 )
 
-renderer.add_element(player_one)
-
-
+renderer.add_element(player_one);
+renderer.add_element(player_two);
+renderer.add_element(player_three);
+renderer.add_element(player_four);
+renderer.add_element(money_value);
