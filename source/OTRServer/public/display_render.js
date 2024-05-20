@@ -208,7 +208,25 @@ let money_value = new Block(
   new PIXI.Text("£100,000", defaultTextStyle),
   PIXI.Sprite.from("../images/MoneyTexture.png"),
   PIXI.Sprite.from("../images/MoneyBorder.png"),
-  PIXI.Sprite.from("../images/MoneyBackground")
+  PIXI.Sprite.from("../images/MoneyBackground.png")
+)
+
+let player_chaser = new Block(
+  [column_value*1, row_value*1],
+  [column_value*2.5, row_value*1.5],
+  new PIXI.Text("CRAIG", defaultTextStyle),
+  PIXI.Sprite.from("../images/ChaserTexture.png"),
+  PIXI.Sprite.from("../images/BlockBorder.png"),
+  PIXI.Sprite.from("../images/BlockBackground.png")
+)
+
+let timer = new Block(
+  [column_value*11, row_value*1],
+  [column_value*4, row_value*1.5],
+  new PIXI.Text("2:00", defaultTextStyle),
+  PIXI.Sprite.from("../images/TimerTexture.png"),
+  PIXI.Sprite.from("../images/BlockBorder.png"),
+  PIXI.Sprite.from("../images/BlockBackground.png")
 )
 
 renderer.add_element(player_one);
@@ -216,3 +234,5 @@ renderer.add_element(player_two);
 renderer.add_element(player_three);
 renderer.add_element(player_four);
 renderer.add_element(money_value);
+renderer.add_element(player_chaser);
+renderer.add_element(timer);
