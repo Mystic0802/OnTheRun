@@ -9,7 +9,7 @@ let cnv = document.getElementById("canvas-parent");
 const app = new PIXI.Application({
   width: cnv.offsetWidth,
   height: cnv.offsetHeight,
-  resizeTo: window
+  resizeTo: window,
 });
 cnv.appendChild(app.view);
 
@@ -22,6 +22,29 @@ await PIXI.Assets.load("../images/MoneyBorder.png");
 await PIXI.Assets.load("../images/MoneyTexture.png");
 
 // ====================================================================================
+// DECORATION CONSTANTS
+// ====================================================================================
+
+const DEFAULT_TEXT_STYLE = new PIXI.TextStyle({
+  fontFamily: "Roboto Mono",
+  fill: "#FFFFFF",
+  // fontSize: 48
+  // Results in something that is about 48 for most sizes.
+  fontSize: cnv.offsetWidth * 0.022,
+});
+
+const BIG_TEXT_STYLE = new PIXI.TextStyle({
+  fontFamily: "Roboto Mono",
+  fill: "#FFFFFF",
+  fontSize: cnv.offsetWidth * 0.022
+})
+
+let layout_columns = 16;
+let layout_rows = 12;
+let column_value = cnv.offsetWidth / layout_columns;
+let row_value = cnv.offsetHeight / layout_rows;
+
+// ====================================================================================
 // RENDERER
 // ====================================================================================
 class Renderer {
@@ -32,18 +55,22 @@ class Renderer {
     // this.app.ticker.add(this.update)
   }
 
-  add_element(__name, __element) {
-    try {
-      let sprite = __element.sprite;
-      if (sprite == null) {
-        throw new Error("No Sprite found on element.");
+  add_elements(__elements) {
+    let elements = __elements;
+    if (!Array.isArray(elements)) elements = [elements];
+    elements.forEach((element) => {
+      console.log(element)
+      try {
+        let sprite = element[1].sprite;
+        if (sprite == null) {
+          throw new Error("No Sprite found on element.");
+        }
+        console.log("Adding: ", element[0]);
+        this.elements.set(element[0], element[1]);
+      } catch (e) {
+        console.error(e);
       }
-      console.log("Adding: ", __name)
-      this.elements.set(__name, __element)
-      // this.elements.push(__element);
-    } catch (e) {
-      console.log(e);
-    }
+    });
   }
 
   clear_elements(__element) {
@@ -52,7 +79,7 @@ class Renderer {
 
   render_elements(__frame_timestamp) {
     this.elements.forEach((element, i) => {
-      console.log("Rendering: ", i)
+      console.log("Rendering: ", i);
       this.app.stage.addChild(element.sprite);
     });
   }
@@ -66,6 +93,22 @@ class Renderer {
     // console.log(`Ticker: ${__ticker}, Time: ${frame_timestamp}`);
     // this.update_animations(frame_timestamp);
     // this.render_elements(frame_timestamp)
+  }
+
+  // ====================================================================================
+  // RENDERING MACROS
+  // ====================================================================================
+  MACRO_JOIN_INIT() {
+    let description = new Block(
+      [column_value * 1, row_value * 5],
+      [column_value * 14, row_value * 2],
+      new PIXI.Text("Waiting for Players!", BIG_TEXT_STYLE),
+      PIXI.Sprite.from("../images/DescriptionTexture.png"),
+      PIXI.Sprite.from("../images/DescriptionBorder.png"),
+      PIXI.Sprite.from("../images/DescriptionBackground.png")
+    );
+
+    this.add_elements([["description", description]]);
   }
 }
 
@@ -119,10 +162,6 @@ class Block {
     try {
       // + 4 accounts for border padding
       // DEFINE SOME TEXT SCALING FUNCTION USING A SCALAR WITH A CONSTANT REDUCTION
-      this.inner.width =
-        this.inner.width / cnv.offsetWidth > 0.12
-          ? cnv.offsetWidth * 0.12
-          : this.inner.width;
       this.inner.position.set(
         this.w / 2 - this.inner.width / 2 + 4,
         this.h / 2 - this.inner.height / 2 + 4
@@ -161,25 +200,10 @@ app.ticker.add((ticker) => {
 // STATIC ELEMENTS INITIALIZATION | CREATE THE PLAYER BLOCKS!
 // ====================================================================================
 
-const defaultTextStyle = new PIXI.TextStyle({
-  fontFamily: "Roboto Mono",
-  fill: "#FFFFFF",
-  x: 100,
-  y: 100,
-  // fontSize: 48
-  // Results in something that is about 48 for most sizes.
-  fontSize: cnv.offsetWidth * 0.022,
-});
-
-let layout_columns = 16;
-let layout_rows = 12;
-let column_value = cnv.offsetWidth / layout_columns;
-let row_value = cnv.offsetHeight / layout_rows;
-
 let player_one = new Block(
   [column_value * 1, row_value * 10],
   [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("GEORGIA", defaultTextStyle),
+  new PIXI.Text("GEORGIA", DEFAULT_TEXT_STYLE),
   PIXI.Sprite.from("../images/PlayerNameTexture.png"),
   PIXI.Sprite.from("../images/BlockBorder.png"),
   PIXI.Sprite.from("../images/BlockBackground.png")
@@ -188,7 +212,7 @@ let player_one = new Block(
 let player_two = new Block(
   [column_value * 3.5, row_value * 10],
   [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("NATHANIEL", defaultTextStyle),
+  new PIXI.Text("NATHANIEL", DEFAULT_TEXT_STYLE),
   PIXI.Sprite.from("../images/PlayerNameTexture.png"),
   PIXI.Sprite.from("../images/BlockBorder.png"),
   PIXI.Sprite.from("../images/BlockBackground.png")
@@ -197,7 +221,7 @@ let player_two = new Block(
 let player_three = new Block(
   [column_value * 10, row_value * 10],
   [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("JAMES", defaultTextStyle),
+  new PIXI.Text("JAMES", DEFAULT_TEXT_STYLE),
   PIXI.Sprite.from("../images/PlayerNameTexture.png"),
   PIXI.Sprite.from("../images/BlockBorder.png"),
   PIXI.Sprite.from("../images/BlockBackground.png")
@@ -206,7 +230,7 @@ let player_three = new Block(
 let player_four = new Block(
   [column_value * 12.5, row_value * 10],
   [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("ANGUS", defaultTextStyle),
+  new PIXI.Text("ANGUS", DEFAULT_TEXT_STYLE),
   PIXI.Sprite.from("../images/PlayerNameTexture.png"),
   PIXI.Sprite.from("../images/BlockBorder.png"),
   PIXI.Sprite.from("../images/BlockBackground.png")
@@ -215,7 +239,7 @@ let player_four = new Block(
 let money_value = new Block(
   [column_value * 6, row_value * 9.75],
   [column_value * 4, row_value * 2],
-  new PIXI.Text("£100,000", defaultTextStyle),
+  new PIXI.Text("£100,000", DEFAULT_TEXT_STYLE),
   PIXI.Sprite.from("../images/MoneyTexture.png"),
   PIXI.Sprite.from("../images/MoneyBorder.png"),
   PIXI.Sprite.from("../images/MoneyBackground.png")
@@ -224,7 +248,7 @@ let money_value = new Block(
 let player_chaser = new Block(
   [column_value * 1, row_value * 1],
   [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("CRAIG", defaultTextStyle),
+  new PIXI.Text("CRAIG", DEFAULT_TEXT_STYLE),
   PIXI.Sprite.from("../images/ChaserTexture.png"),
   PIXI.Sprite.from("../images/BlockBorder.png"),
   PIXI.Sprite.from("../images/BlockBackground.png")
@@ -233,19 +257,19 @@ let player_chaser = new Block(
 let timer = new Block(
   [column_value * 11, row_value * 1],
   [column_value * 4, row_value * 2],
-  new PIXI.Text("2:00", defaultTextStyle),
+  new PIXI.Text("2:00", DEFAULT_TEXT_STYLE),
   PIXI.Sprite.from("../images/TimerTexture.png"),
   PIXI.Sprite.from("../images/BlockBorder.png"),
   PIXI.Sprite.from("../images/BlockBackground.png")
 );
 
-renderer.add_element("player_one", player_one);
-renderer.add_element("player_two", player_two);
-renderer.add_element("player_three", player_three);
-renderer.add_element("player_four", player_four);
-renderer.add_element("money_value", money_value);
-renderer.add_element("player_chaser", player_chaser);
-renderer.add_element("timer", timer);
-renderer.render_elements();
+// renderer.add_elements([["player_one", player_one]]);
+// renderer.add_elements("player_two", player_two);
+// renderer.add_elements("player_three", player_three);
+// renderer.add_elements("player_four", player_four);
+// renderer.add_elements("money_value", money_value);
+// renderer.add_elements("player_chaser", player_chaser);
+// renderer.add_elements("timer", timer);
+// renderer.render_elements();
 
-export default {renderer}
+export default { renderer };
