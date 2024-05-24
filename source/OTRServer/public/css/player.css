@@ -1,0 +1,98 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    max-width: 100vw;
+    max-height: 100vh;
+    font-family: "Roboto Mono", monospace;
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+#wrapper {
+    display: flex;
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+#login-wrapper {
+    display: block;
+    width: calc(100vw/4);
+    height: 100%;
+    align-items:normal;
+    justify-content: center;
+}
+
+#login-hero {
+    display: flex;
+    position: relative;
+    width: 100%;
+    aspect-ratio: calc(445/81);
+    margin: 4em 0;
+}
+
+#login-username{
+    display: flex;
+    position: relative;
+    width: 100%;
+    margin: 4em 0;
+}
+
+#login-username input {
+    height: 100%;
+    width: 100%;
+    outline: none;
+    font-family: "Roboto Mono", monospace;
+    font-size: 2em;
+    text-align: center;
+    padding: 1em 0;
+    color: #FFFFFF;
+    border: none;
+    background: rgb(1,1,102);
+    background: linear-gradient(0deg, rgba(1,1,102,1) 0%, rgba(3,2,255,1) 100%);
+    border-radius: 0.5em;
+    border: 4px solid #010033; 
+    transition-duration: 255ms;
+}
+
+#login-username input::placeholder {
+    /* color: #D8DDE1; */
+    color: #9EABB5;
+}
+
+#login-username input:focus {
+    border-color: #FFFFFF;
+    transition-duration: 255ms;
+}
+
+#login-submit {
+    display: flex;
+    position: relative;
+    width: 100%;
+    margin: 4em 0;
+    align-items: center;
+    justify-content: center;
+}
+
+#login-button {
+    display: flex;
+    position: relative;
+    font-size: 2em;
+    padding: 1em 2em;
+    background: rgb(1,1,102);
+    background: linear-gradient(0deg, rgba(1,1,102,1) 0%, rgba(3,2,255,1) 100%);
+    border-radius: 0.5em;
+    border: 4px solid #D8DDE1;
+    cursor: pointer;
+}
+
+@media (max-width:480px) {
+    #login-wrapper {
+        width: calc(100vw*0.9);
+
+    }
+}

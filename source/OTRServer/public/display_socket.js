@@ -5,13 +5,14 @@ let socket_path = "/game";
 // State Control
 // ====================================================================================
 
-// State logic enum equivalent.
-const State = Object.freeze({
-  INIT: Symbol("state_init"),
-  JOIN: Symbol("state_join"),
-  GAME_START: Symbol("state_game_start"),
-  GAME_TRANSITION: Symbol("state_game_transition"),
-});
+
+// // State logic enum equivalent.
+// const State = Object.freeze({
+//   INIT: Symbol("state_init"),
+//   JOIN: Symbol("state_join"),
+//   GAME_START: Symbol("state_game_start"),
+//   GAME_TRANSITION: Symbol("state_game_transition"),
+// });
 
 const STATE_REGEX = RegExp(/\(.+\)/, "g");
 
@@ -46,6 +47,7 @@ socket.on("display_data", handle_new_data);
 //
 
 function display_join_init() {
+  renderer.clear_elements();
   renderer.MACRO_JOIN_INIT();
   renderer.render_elements();
 }

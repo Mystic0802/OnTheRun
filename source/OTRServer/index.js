@@ -79,20 +79,20 @@ io.on("connection", (socket) => {
 });
 
 // ====================================================================================
-// Server Start
+// Server Start + Routes
 // ====================================================================================
 
 
 var displayRouter = require("./routes/display");
 app.use("/display", displayRouter);
+var playerRouter = require("./routes/player");
+app.use("/", playerRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
 // app.set('views', path.join(__dirname, 'views'))
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+
 
 app.set("port", port);
 console.log(`App listening at http://localhost:${port}`);

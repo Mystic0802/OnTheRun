@@ -59,7 +59,6 @@ class Renderer {
     let elements = __elements;
     if (!Array.isArray(elements)) elements = [elements];
     elements.forEach((element) => {
-      console.log(element)
       try {
         let sprite = element[1].sprite;
         if (sprite == null) {
@@ -73,8 +72,8 @@ class Renderer {
     });
   }
 
-  clear_elements(__element) {
-    this.elements = [];
+  clear_elements() {
+    this.elements = new Map();
   }
 
   render_elements(__frame_timestamp) {
