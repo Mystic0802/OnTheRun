@@ -88,6 +88,12 @@ body {
     border-radius: 0.5em;
     border: 4px solid #D8DDE1;
     cursor: pointer;
+    transition-duration: 255ms
+}
+
+#login-button:hover {
+    border-color: #6F787F;
+    color: #6F787F;
 }
 
 @media (max-width:480px) {

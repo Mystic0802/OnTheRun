@@ -1,3 +1,6 @@
+// Default Socket Path
+const socket_path = "/game";
+
 // State logic enum equivalent.
 const State = Object.freeze({
     INIT: Symbol("state_init"),

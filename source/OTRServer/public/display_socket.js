@@ -1,5 +1,4 @@
 import display_render from "./display_render.js";
-let socket_path = "/game";
 
 // ====================================================================================
 // State Control
