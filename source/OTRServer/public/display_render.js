@@ -73,7 +73,7 @@ class Renderer {
     });
   }
 
-  clear_elements(__element) {
+  clear_elements() {
     this.elements = [];
   }
 
