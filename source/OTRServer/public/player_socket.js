@@ -28,6 +28,12 @@ socket.on("player_get_response", (__msg) => {
 })
 
 
+// STATE HANDLER
+socket.on("state", (__msg) => {
+  console.log("State: ", __msg)
+
+})
+
 // ====================================================================================
 // LOGIN
 // ====================================================================================
@@ -65,8 +71,13 @@ socket.on("player_create_response", (__msg) => {
   // set cookie values from response
   set_cookie('username', msg_data.name, 1)
   set_cookie('session_id', msg_data.session_id, 1)
-  console.log(document.cookie)
+  // Clear the display and then show the waiting screen
+  clear_display();
+  display_wait(msg_data.name);
 });
+
+
+
 
 // ====================================================================================
 // COOKIE UTILS
