@@ -2,17 +2,33 @@
 // Server Init
 // ====================================================================================
 
+const { v4 } = require("uuid");
+
 const express = require("express");
 const app = express();
 const port = 3000;
 const path = require("path");
 const { Server } = require("socket.io");
-const { createServer } = require("http");
+const { createServer, STATUS_CODES } = require("http");
 
 var server = createServer(app);
 const io = new Server(server, {
   path: "/game",
 });
+
+// ====================================================================================
+// Players
+// ====================================================================================
+
+// Players dataclass
+class Player {
+  constructor(__name, __uuid, __socket_id) {
+    this.name = __name;
+    this.uuid = __uuid;
+    this.socket_id = __socket_id;
+    this.score = 0;
+  }
+}
 
 // ====================================================================================
 // State Control
@@ -38,7 +54,7 @@ function resolve_state(__input_state, __input_transition) {
   )
     return State.JOIN;
   else if (
-    __input_state == Transitions.JOIN_DONE &&
+    __input_transition == Transitions.JOIN_DONE &&
     __input_state == State.JOIN
   )
     return State.GAME_START;
@@ -48,7 +64,8 @@ function resolve_state(__input_state, __input_transition) {
 // THE STATE!!!1!!!
 let state = State.INIT;
 // temporary player list
-let players = []
+let players = new Map();
+let socket_uuid_map = new Map();
 
 // ====================================================================================
 // Websocket Logic
@@ -65,9 +82,6 @@ function create_message(__state, __data) {
 // Socket logic.
 io.on("connection", (socket) => {
   console.log(`user connected: ${socket.id}`);
-  socket.on("disconnect", () => {
-    console.log(`user disconnected: ${socket.id}`);
-  });
 
   // display_get init logic.
   // server discovering display for the first time
@@ -91,19 +105,31 @@ io.on("connection", (socket) => {
   socket.on("player_create", (__msg, callback) => {
     try {
       let msg_data = __msg;
-      if(!msg_data) throw new Error("no message received.")
-      if(!msg_data.name) throw new Error("no name attribute on message.")
-      console.log(`player create request: ${msg_data.name}`)
+      if (!msg_data) throw new Error("no message received.");
+      if (!msg_data.name) throw new Error("no name attribute on message.");
+      console.log(`player create request: ${msg_data.name}`);
 
-      players.push([msg_data.name, socket.id])
-      // generate some session uuid instead of whatever this is lol
+      // generate a uuid for the player
+      let uuid = v4();
+      // send the response
       let msg = {
         ok: true,
         name: msg_data.name,
-        session_id: `${msg_data.name}${socket.id}`
-      }
-      socket.emit('player_create_response', msg)
+        session_id: uuid,
+      };
+      socket.emit("player_create_response", msg);
+      // add the uuid to the existing players list
+      players.set(uuid, new Player(msg_data.name, uuid, socket.id));
+      socket_uuid_map.set(socket.id, uuid);
 
+      // lobby full logic
+      if (players.size >= 4) {
+        console.log("reached player cap")
+        state = resolve_state(state, Transitions.JOIN_DONE);
+        console.log("new state", state)
+        let msg = create_message(state.toString(), {});
+        io.emit("state", msg);
+      }
     } catch (e) {
       console.log(`Player_create error: ${e}`);
     }
@@ -114,21 +140,52 @@ io.on("connection", (socket) => {
   socket.on("player_get", (__msg, callback) => {
     try {
       let msg_data = __msg;
-      if (!msg_data) throw new Error("no message received.")
-      if (!msg_data.username) throw new Error("no username given for existing session sync request.")
-      if (!msg_data.session_id) throw new Error("no session_id given for existing session sync request.");
-  
-      console.log(`player get request: username:${msg_data.username},session_id:${msg_data.session_id}`)
+
+      if (!msg_data) throw new Error("no message received.");
+      if (!msg_data.username)
+        throw new Error("no username given for existing session sync request.");
+      if (!msg_data.session_id)
+        throw new Error(
+          "no session_id given for existing session sync request."
+        );
+      if (!players.has(msg_data.session_id))
+        throw new Error(
+          `get request with invalid session id: ${msg_data.session_id}`
+        );
+
+      console.log(
+        `ok player get request: username:${msg_data.username},session_id:${msg_data.session_id}`
+      );
+      let player = players.get(msg_data.session_id);
+
       let msg = {
-        data: "yeah you good."
-      }
-      socket.emit("player_get_response", msg)
-
-    } catch(e) {
+        ok: true,
+        name: player.name,
+        session_id: player.uuid,
+      };
+      socket.emit("player_get_response", msg);
+    } catch (e) {
       console.log(`Player_get error: ${e}`);
-
     }
-  })
+  });
+
+  // disconnect logic.
+  socket.on("disconnect", (__msg, callback) => {
+    // try remove player from lists
+    // only clear the lists if the game is in the joining state
+    // otherwise keep the info so they can rejoin
+    if (state != State.JOIN) return;
+    console.log(`user disconnected: ${socket.id}`);
+    try {
+      console.log(`removing player`);
+      let player_uuid = socket_uuid_map.get(socket.id);
+      // remove records.
+      players.delete(player_uuid);
+      socket_uuid_map.delete(socket.id);
+    } catch (e) {
+      console.log(`disconnect error: ${e}`);
+    }
+  });
 });
 
 // ====================================================================================
@@ -148,3 +205,7 @@ app.set("port", port);
 console.log(`App listening at http://localhost:${port}`);
 
 server.listen(port);
+
+// ====================================================================================
+// Utils
+// ====================================================================================

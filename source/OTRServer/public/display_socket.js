@@ -56,6 +56,7 @@ function handle_new_data(__msg) {
 }
 
 function handle_state_msg(__state_msg) {
+  console.log(__state_msg)
   if (connected == false) return;
   let state;
   // Try to extract state from message

@@ -22,8 +22,7 @@ function display_init() {
 }
 
 function display_join() {
-    wrapper_join.style.display = "block";
-
+  wrapper_join.style.display = "block";
 }
 
 function display_wait(__username) {

@@ -65,7 +65,7 @@ body {
     background: rgb(1, 1, 102);
     background: linear-gradient(0deg, rgba(1, 1, 102, 1) 0%, rgba(3, 2, 255, 1) 100%);
     border-radius: 0.5em;
-    border: 4px solid #010033;
+    border: 4px solid #FFFFFF;
     transition-duration: 255ms;
 }
 
@@ -75,7 +75,7 @@ body {
 }
 
 #login-username input:focus {
-    border-color: #FFFFFF;
+    border-color: #010033;
     transition-duration: 255ms;
 }
 
