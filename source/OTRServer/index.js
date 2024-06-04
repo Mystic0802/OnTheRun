@@ -83,18 +83,22 @@ function create_message(__state, __data) {
 
 function check_ready() {
   // lobby full logic
-  if (players.size >= 4 && player_chaser) {
-    console.log("reached player cap");
-    state = resolve_state(state, Transitions.JOIN_DONE);
+  console.log(`players size: ${players.size}, chaser: ${player_chaser}`)
+  if (players.size < 4 || !player_chaser) return;
+  console.log("reached player cap");
+  state = resolve_state(state, Transitions.JOIN_DONE);
 
-    // let player_names = players.values().map(({ test }) => test);
-    // console.log("players", players)
-    // let player_names = players.map(({ test }) => test);
-    console.log("player names: ", player_names);
-
-    let msg = create_message(state.toString(), {});
-    io.emit("state", msg);
-  }
+  // let player_names = players.values().map(({ test }) => test);
+  let player_names = [];
+  // value, key
+  players.forEach((playerObj, uuid) => {
+    player_names.push(playerObj);
+  });
+  let data = {
+    player_names: player_names,
+  };
+  let msg = create_message(state.toString(), data);
+  io.emit("state", msg);
 }
 
 // Socket logic.
@@ -119,35 +123,9 @@ io.on("connection", (socket) => {
     }
   });
 
-  // create player requests
-  socket.on("player_create", (__msg, callback) => {
-    // don't let people join if not in the join state
-    if (state != State.JOIN) return;
-    try {
-      let msg_data = __msg;
-      if (!msg_data) throw new Error("no message received.");
-      if (!msg_data.name) throw new Error("no name attribute on message.");
-      console.log(`player create request: ${msg_data.name}`);
-
-      // generate a uuid for the player
-      let uuid = v4();
-      // send the response
-      let msg = {
-        ok: true,
-        name: msg_data.name,
-        session_id: uuid,
-      };
-      socket.emit("player_create_response", msg);
-      // add the uuid to the existing players list
-      players.set(uuid, new Player(msg_data.name, uuid, socket.id));
-      socket_uuid_map.set(socket.id, uuid);
-
-      // check whether the game is ready.
-      check_ready();
-    } catch (e) {
-      console.log(`Player_create error: ${e}`);
-    }
-  });
+  // ====================================================================================
+  // PLAYER CREATION
+  // ====================================================================================
 
   // player recovery requests
   // to-do, actually sync it.
@@ -183,6 +161,69 @@ io.on("connection", (socket) => {
     }
   });
 
+  // create player requests
+  socket.on("player_create", (__msg, callback) => {
+    // don't let people join if not in the join state
+    if (state != State.JOIN) return;
+    try {
+      let msg_data = __msg;
+      if (!msg_data) throw new Error("no message received.");
+      if (!msg_data.name) throw new Error("no name attribute on message.");
+      console.log(`player create request: ${msg_data.name}`);
+
+      // generate a uuid for the player
+      let uuid = v4();
+      // send the response
+      let msg = {
+        ok: true,
+        name: msg_data.name,
+        session_id: uuid,
+      };
+      socket.emit("player_create_response", msg);
+      // add the uuid to the existing players list
+      players.set(uuid, new Player(msg_data.name, uuid, socket.id));
+      socket_uuid_map.set(socket.id, uuid);
+
+      // check whether the game is ready.
+      check_ready();
+    } catch (e) {
+      console.log(`Player_create error: ${e}`);
+    }
+  });
+
+  socket.on("chaser_create", (__msg, callback) => {
+    if (state != State.JOIN) return;
+    // if the chaser is already joined dont allow another
+    if (player_chaser) return;
+    try {
+      let msg_data = __msg;
+      if (!msg_data) throw new Error("no message received.");
+      if (!msg_data.name) throw new Error("no name attribute on message.");
+      console.log(`chaser create request: ${msg_data.name}`);
+
+      // generate a uuid for the player
+      let uuid = v4();
+      // send the response
+      let msg = {
+        ok: true,
+        name: msg_data.name,
+        session_id: uuid,
+      };
+      // set chaser player value
+      player_chaser = new Player(msg_data.name, uuid, socket.id);
+      // check whether the game is ready.
+      check_ready();
+
+      socket.emit("chaser_create_response", msg);
+    } catch (e) {
+      console.log(`Chaser_create error: ${e}`);
+    }
+  });
+
+  // ====================================================================================
+  // DISCONNECT
+  // ====================================================================================
+
   // disconnect logic.
   socket.on("disconnect", (__msg, callback) => {
     // try remove player from lists
@@ -211,7 +252,7 @@ app.use("/display", displayRouter);
 var playerRouter = require("./routes/player");
 app.use("/", playerRouter);
 var chaserRouter = require("./routes/chaser");
-app.use("/chaser", chaserRouter)
+app.use("/chaser", chaserRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
 // app.set('views', path.join(__dirname, 'views'))
