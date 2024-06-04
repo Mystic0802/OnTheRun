@@ -8,3 +8,10 @@ const State = Object.freeze({
     GAME_START: Symbol("state_game_start"),
     GAME_TRANSITION: Symbol("state_game_transition"),
   });
+
+// State util
+const STATE_REGEX = RegExp(/\(.+\)/, "g");
+function extract_state(__state_string) {
+  return STATE_REGEX.exec(__state_string);
+}
+  

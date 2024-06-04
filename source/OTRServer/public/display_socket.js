@@ -4,28 +4,49 @@ import display_render from "./display_render.js";
 // State Control
 // ====================================================================================
 
+let state = State.INIT;
+let connected = false;
 
-// // State logic enum equivalent.
-// const State = Object.freeze({
-//   INIT: Symbol("state_init"),
-//   JOIN: Symbol("state_join"),
-//   GAME_START: Symbol("state_game_start"),
-//   GAME_TRANSITION: Symbol("state_game_transition"),
-// });
-
-const STATE_REGEX = RegExp(/\(.+\)/, "g");
-
-function extract_state(__state_string) {
-  return STATE_REGEX.exec(__state_string);
+function handle_state_msg(__state_msg) {
+  console.log(__state_msg);
+  if (connected == false) return;
+  let new_state;
+  // Try to extract state from message
+  // We quarantine this as the object might not have a state attribute on it.
+  try {
+    new_state = extract_state(__state_msg.state);
+    if (new_state == null) return;
+  } catch (e) {
+    console.error(e);
+  }
+  let state_val = new_state[0].replace(/^\(+|\)+$/g, "");
+  switch (state_val) {
+    case State.INIT.description:
+      state = State.INIT;
+      console.log("Initialized Ok");
+      // Don't need to do anything, we've already let the server know we are setup.
+      break;
+    case State.JOIN.description:
+      console.log("Join State Received.");
+      state = State.JOIN;
+      display_join_init();
+      break;
+    case State.GAME_START.description:
+      state = State.GAME_START;
+      console.log("Game_Start State Receieved.");
+      display_game_start();
+      break;
+    default:
+      console.error(`Unrecognised State: ${state_val}`);
+      break;
+  }
 }
 
 // ====================================================================================
 // Pretty much all logic
 // ====================================================================================
 
-let state = State.INIT;
-let connected = false;
-let renderer = display_render.renderer
+let renderer = display_render.renderer;
 // Initialize socket on game path
 // this might change if I figure out how to do multiple socket.io clients.
 const socket = io({
@@ -51,34 +72,10 @@ function display_join_init() {
   renderer.render_elements();
 }
 
-function handle_new_data(__msg) {
-  console.log("b");
+function display_game_start() {
+  renderer.clear_elements();
 }
 
-function handle_state_msg(__state_msg) {
-  console.log(__state_msg)
-  if (connected == false) return;
-  let state;
-  // Try to extract state from message
-  // We quarantine this as the object might not have a state attribute on it.
-  try {
-    state = extract_state(__state_msg.state);
-    if (state == null) return;
-  } catch (e) {
-    console.error(e);
-  }
-  let state_val = state[0].replace(/^\(+|\)+$/g, "");
-  switch (state_val) {
-    case State.INIT.description:
-      console.log("Initialized Ok");
-      // Don't need to do anything, we've already let the server know we are setup.
-      break;
-    case State.JOIN.description:
-      console.log("Join State Received.");
-      display_join_init()
-      break;
-    default:
-      console.error(`Unrecognised State: ${state_val}`);
-      break;
-  }
+function handle_new_data(__msg) {
+  console.log("b");
 }

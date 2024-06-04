@@ -63,9 +63,11 @@ function resolve_state(__input_state, __input_transition) {
 
 // THE STATE!!!1!!!
 let state = State.INIT;
-// temporary player list
+// uuid -> Player (obj)
 let players = new Map();
+// socket -> uuid
 let socket_uuid_map = new Map();
+let player_chaser;
 
 // ====================================================================================
 // Websocket Logic
@@ -77,6 +79,22 @@ function create_message(__state, __data) {
     state: __state,
     data: __data,
   };
+}
+
+function check_ready() {
+  // lobby full logic
+  if (players.size >= 4 && player_chaser) {
+    console.log("reached player cap");
+    state = resolve_state(state, Transitions.JOIN_DONE);
+
+    // let player_names = players.values().map(({ test }) => test);
+    // console.log("players", players)
+    // let player_names = players.map(({ test }) => test);
+    console.log("player names: ", player_names);
+
+    let msg = create_message(state.toString(), {});
+    io.emit("state", msg);
+  }
 }
 
 // Socket logic.
@@ -103,6 +121,8 @@ io.on("connection", (socket) => {
 
   // create player requests
   socket.on("player_create", (__msg, callback) => {
+    // don't let people join if not in the join state
+    if (state != State.JOIN) return;
     try {
       let msg_data = __msg;
       if (!msg_data) throw new Error("no message received.");
@@ -122,14 +142,8 @@ io.on("connection", (socket) => {
       players.set(uuid, new Player(msg_data.name, uuid, socket.id));
       socket_uuid_map.set(socket.id, uuid);
 
-      // lobby full logic
-      if (players.size >= 4) {
-        console.log("reached player cap")
-        state = resolve_state(state, Transitions.JOIN_DONE);
-        console.log("new state", state)
-        let msg = create_message(state.toString(), {});
-        io.emit("state", msg);
-      }
+      // check whether the game is ready.
+      check_ready();
     } catch (e) {
       console.log(`Player_create error: ${e}`);
     }
@@ -209,3 +223,15 @@ server.listen(port);
 // ====================================================================================
 // Utils
 // ====================================================================================
+
+// ====================================================================================
+// TESTING
+// ====================================================================================
+// temporary players
+let uuid1 = v4();
+let uuid2 = v4();
+let uuid3 = v4();
+let uuid4 = v4();
+players.set(uuid1, new Player("player1", uuid1, null));
+players.set(uuid2, new Player("player2", uuid2, null));
+players.set(uuid3, new Player("player3", uuid3, null));
