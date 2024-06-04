@@ -212,9 +212,101 @@ body {
 }
 
 
-
-
-
 /* ==================================================================================== */
 /* WAIT SCREEN
 /* ==================================================================================== */
+
+
+/* ==================================================================================== */
+/* GAME
+/* ==================================================================================== */
+#game-wrapper {
+    display: flex;
+    position: relative;
+    width: calc(100vw/4);
+    height: fit-content;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#game-player-text {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 2.22em;
+}
+
+#game-answer-wrapper {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: fit-content;
+    margin: 4em 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.game-answer-item {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: fit-content;
+    margin: 1em 0;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.game-answer-item-deco {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-answer-item-deco img {
+    display: block;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    
+}
+
+/* Locked Answer dimming effect */
+.game-answer-item-deco-cover {
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #05293F;
+    opacity: 0;
+    z-index: 1;
+    border-radius: 1em;
+    transition-duration: 255ms;
+}
+
+.game-answer-item:hover .game-answer-item-deco-cover {
+    transition-duration: 255ms;
+    opacity: 0.5;
+}
+
+.game-answer-item-text {
+    display: block;
+    width: 100%;
+    position: absolute;
+    font-size: 1.5em;
+    z-index: 2;
+}
+
+@media (max-width:480px) {
+    #game-wrapper {
+        width: calc(100vw*0.9)
+    }
+
+}

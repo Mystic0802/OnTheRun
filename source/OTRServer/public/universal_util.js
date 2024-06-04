@@ -52,6 +52,7 @@ function handle_state_msg(__state_msg) {
     console.error(e);
   }
   let state_val = new_state[0].replace(/^\(+|\)+$/g, "");
+
   switch (state_val) {
     case State.INIT.description:
       state = State.INIT;
@@ -61,11 +62,15 @@ function handle_state_msg(__state_msg) {
     case State.JOIN.description:
       state = State.JOIN;
       console.log("Join State Received.");
-      display_join_init();
       break;
     case State.GAME_START.description:
       state = State.GAME_START;
       console.log("Game_Start State Receieved.");
+      console.log(__state_msg);
+      clear_display();
+      let username = get_cookie("username");
+      display_game_start(username);
+      break;
     default:
       console.error(`Unrecognised State: ${state_val}`);
       break;
