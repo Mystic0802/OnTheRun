@@ -210,6 +210,8 @@ var displayRouter = require("./routes/display");
 app.use("/display", displayRouter);
 var playerRouter = require("./routes/player");
 app.use("/", playerRouter);
+var chaserRouter = require("./routes/chaser");
+app.use("/chaser", chaserRouter)
 
 app.use(express.static(path.join(__dirname, "public")));
 // app.set('views', path.join(__dirname, 'views'))
