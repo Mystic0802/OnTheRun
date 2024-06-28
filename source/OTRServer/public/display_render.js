@@ -109,6 +109,11 @@ class Renderer {
 
     this.add_elements([["description", description]]);
   }
+
+  MACRO_GAME_START_INIT() {
+    
+
+  }
 }
 
 // ====================================================================================

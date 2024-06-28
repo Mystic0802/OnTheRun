@@ -81,6 +81,7 @@ function create_message(__state, __data) {
   };
 }
 
+// checks whether the game_start state should be done.
 function check_ready() {
   // lobby full logic
   console.log(`players size: ${players.size}, chaser: ${player_chaser}`)
