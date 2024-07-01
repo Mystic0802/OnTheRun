@@ -12,6 +12,7 @@ const { Server } = require("socket.io");
 const { createServer, STATUS_CODES } = require("http");
 
 var server = createServer(app);
+// Spawn socket io server.
 const io = new Server(server, {
   path: "/game",
 });
@@ -19,9 +20,19 @@ const io = new Server(server, {
 // ====================================================================================
 // Players
 // ====================================================================================
-
-// Players dataclass
+/**
+ * Player Dataclass/Class. Groups attributes for each distinct player using their unique UUID.
+ * Both the chaser and regular players/contestants are stored internally using instances of this class.
+ *
+ * The UUID is stored inside the of the class, although a seperate reference is used to hash each player
+ * in the players map.
+ */
 class Player {
+  /**
+   * @param {*} __name: Display name of the player.
+   * @param {*} __uuid: UUID/session-id of the player.
+   * @param {*} __socket_id: Socket.io/Websocket UUID through which the player is connected.
+   */
   constructor(__name, __uuid, __socket_id) {
     this.name = __name;
     this.uuid = __uuid;
@@ -34,7 +45,24 @@ class Player {
 // State Control
 // ====================================================================================
 
-// State logic enum equivalent.
+/**
+ * __! The variable: state (lowercase) is the server's running instance of this enumeration. !__ 
+ * 
+ * __! This enumeration differs slightly in elements to the states used in the client-side states.js. !__
+ * 
+ * Enumeration of the finite states the server can exist in.
+ * Each state represents a distinct status of the game indicative of its name.
+ *
+ * For example, the server could be in the INIT state (representing initialization),
+ * which would be a state mutually exclusive to the other possible states.
+ *
+ * __States__
+ * - INIT : Initialization state for the server. It's purpose is to block processes, including joining, until a display client (the big screen) has been connected.
+ * This will resultantly, not allow the game to run head-less.
+ * - JOIN : State which enables clients to join the game as either players or the chaser. Persists whilst the required player count has not yet been met.
+ * - GAME_START: Synchronization state which enables the server to transition all connected clients from the Waiting-Lobby screen onto the main game.
+ * - GAME_TRANSITION: Currently Unused.
+ */
 const State = Object.freeze({
   INIT: Symbol("state_init"),
   JOIN: Symbol("state_join"),
@@ -42,6 +70,17 @@ const State = Object.freeze({
   GAME_TRANSITION: Symbol("state_game_transition"),
 });
 
+/**
+ *  __! This enumeration differs slightly in elements to the states used in the client-side states.js. !__
+ * 
+ * __! See @function resolve_state for  !__
+ * 
+ * Enumeration of the transitions through which the server's state can be changed. Each transition acts as a coin which permits a state to mutate in a defined manner
+ * into another state.
+ * 
+ * For example, the INIT State can transition into the JOIN State if a valid 
+ * 
+ */
 const Transitions = Object.freeze({
   INIT_DONE: Symbol("init_done"),
   JOIN_DONE: Symbol("join_done"),
