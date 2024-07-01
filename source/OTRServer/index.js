@@ -82,12 +82,12 @@ function create_message(__state, __data) {
 }
 
 function get_player_names() {
-  let a = []
+  let a = [];
   // value, key
   players.forEach((playerObj, uuid) => {
     a.push(playerObj.name);
   });
-  return a
+  return a;
 }
 
 // checks whether the game_start state should be done.
@@ -100,6 +100,7 @@ function check_ready() {
 
   let data = {
     player_names: get_player_names(),
+    chaser_name: player_chaser.name
   };
   let msg = create_message(state.toString(), data);
   io.emit("state", msg);
@@ -120,12 +121,12 @@ io.on("connection", (socket) => {
       // this should emit the current state of the whole game
       // because this might be a refresh-recovery thing, the state
       // and all game data should be emitted. will be resolved on the client end.
-      let data = {}
+      let data = {};
       switch (state.description) {
         case State.GAME_START.description:
-          data = {player_names: get_player_names()}
+          data = { player_names: get_player_names(), chaser_name: player_chaser.name };
       }
-      console.log(`get display state: ${state.description}`)
+      console.log(`get display state: ${state.description}`);
       let msg = create_message(state.toString(), data);
       socket.emit("state", msg);
     } catch (e) {

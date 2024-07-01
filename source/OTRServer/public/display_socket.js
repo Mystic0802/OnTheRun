@@ -8,7 +8,6 @@ let state = State.INIT;
 let connected = false;
 
 function handle_state_msg(__state_msg) {
-  console.log(__state_msg);
   if (connected == false) return;
   let new_state;
   // Try to extract state from message
@@ -34,8 +33,7 @@ function handle_state_msg(__state_msg) {
     case State.GAME_START.description:
       state = State.GAME_START;
       console.log("Game_Start State Receieved.");
-      console.log(__state_msg.data)
-      display_game_start();
+      display_game_start(__state_msg.data);
       break;
     default:
       console.error(`Unrecognised State: ${state_val}`);
@@ -73,14 +71,30 @@ function display_join_init() {
   renderer.render_elements();
 }
 
-function display_game_start() {
-  renderer.clear_elements();
-  // add the element spaces, which have empty internal values
-  renderer.MACRO_GAME_START_INIT();
-  // fill in the values using references 
-  console.log(renderer.get_element("player_one_block"))
-  
-  renderer.render_elements();
+function display_game_start(__state_data) {
+  try {
+    // check data for the correct values.
+    if (!__state_data.hasOwnProperty("player_names"))
+      throw new Error("No player_names in game_start data.");
+    if (__state_data.player_names.length != 4)
+      throw new Error("Number of player_names != 4");
+    if (!__state_data.hasOwnProperty("chaser_name"))
+      throw new Error("No chaser_name in game_start data.");
+
+    renderer.clear_elements();
+    // add the element spaces, which have empty internal values
+    renderer.MACRO_GAME_START_INIT();
+    renderer.MACRO_SET_INIT_GAME_VALUES(
+      __state_data.player_names,
+      __state_data.chaser_name
+    );
+    // fill in the values using references
+    // renderer.get_element("player_one_block").set_new_inner(new PIXI.Text("2:00", DEFAULT_TEXT_STYLE))
+
+    renderer.render_elements();
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 function handle_new_data(__msg) {

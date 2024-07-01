@@ -177,7 +177,7 @@ class Renderer {
     let timer = new Block(
       [column_value * 11, row_value * 1],
       [column_value * 4, row_value * 2],
-      new PIXI.Text("2:00", DEFAULT_TEXT_STYLE),
+      null,
       PIXI.Sprite.from("../images/TimerTexture.png"),
       PIXI.Sprite.from("../images/BlockBorder.png"),
       PIXI.Sprite.from("../images/BlockBackground.png")
@@ -192,6 +192,31 @@ class Renderer {
       ["money_value", money_value],
       ["timer", timer],
     ]);
+  }
+
+  MACRO_SET_INIT_GAME_VALUES(
+    __player_names,
+    __chaser_name,
+    __money_value = "£0"
+  ) {
+    this.elements
+      .get("player_one_block")
+      .set_new_inner(new PIXI.Text(__player_names[0], DEFAULT_TEXT_STYLE));
+    this.elements
+      .get("player_two_block")
+      .set_new_inner(new PIXI.Text(__player_names[1], DEFAULT_TEXT_STYLE));
+    this.elements
+      .get("player_three_block")
+      .set_new_inner(new PIXI.Text(__player_names[2], DEFAULT_TEXT_STYLE));
+    this.elements
+      .get("player_four_block")
+      .set_new_inner(new PIXI.Text(__player_names[3], DEFAULT_TEXT_STYLE));
+    this.elements
+      .get("player_chaser_block")
+      .set_new_inner(new PIXI.Text(__chaser_name, DEFAULT_TEXT_STYLE));
+    this.elements
+      .get("money_value")
+      .set_new_inner(new PIXI.Text(__money_value, DEFAULT_TEXT_STYLE));
   }
 }
 
@@ -272,32 +297,22 @@ class Block {
   set_new_inner(__inner) {
     try {
       if (this.sprite) this.sprite.removeChildren();
-      console.log(__inner);
       this.inner = __inner;
       this.inner.position.set(
         this.w / 2 - this.inner.width / 2 + 4,
         this.h / 2 - this.inner.height / 2 + 4
       );
+      // as everything has been cleared, need to restack everything.
+      this.sprite.addChild(this.background);
+      this.sprite.addChild(this.texture_sprite);
+      // add the inner
       this.sprite.addChild(this.inner);
+      this.sprite.addChild(this.border);
     } catch (e) {
       console.error(e);
     }
   }
 
-  // set inner(__inner) {
-  //   try {
-  //     if (this.sprite) this.sprite.removeChildren();
-  //     console.log(__inner)
-  //     this.inner = __inner;
-  //     this.inner.position.set(
-  //       this.w / 2 - this.inner.width / 2 + 4,
-  //       this.h / 2 - this.inner.height / 2 + 4
-  //     );
-  //     this.sprite.addChild(this.inner);
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // }
 }
 
 // ====================================================================================
