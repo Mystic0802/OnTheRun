@@ -25,6 +25,7 @@ await PIXI.Assets.load("../images/MoneyTexture.png");
 // DECORATION CONSTANTS
 // ====================================================================================
 
+// Default/Standard text style for the main display.
 const DEFAULT_TEXT_STYLE = new PIXI.TextStyle({
   fontFamily: "Roboto Mono",
   fill: "#FFFFFF",
@@ -33,6 +34,7 @@ const DEFAULT_TEXT_STYLE = new PIXI.TextStyle({
   fontSize: cnv.offsetWidth * 0.022,
 });
 
+// Alternate, larger, text style.
 const BIG_TEXT_STYLE = new PIXI.TextStyle({
   fontFamily: "Roboto Mono",
   fill: "#FFFFFF",
@@ -47,7 +49,15 @@ let row_value = cnv.offsetHeight / layout_rows;
 // ====================================================================================
 // RENDERER
 // ====================================================================================
+/**
+ * Canvas wrapper and rendering controller.
+ * 
+ * Singleton instance wrapper which interacts with the display's canvas.
+ */
 class Renderer {
+  /**
+   * @param {*} __app: PIXI.js application instance. This is the display's canvas.
+   */
   constructor(__app) {
     this.app = __app;
     this.elements = new Map();
@@ -55,6 +65,17 @@ class Renderer {
     // this.app.ticker.add(this.update)
   }
 
+  /**
+   * __! Each element should be added via array-tuples in the following manner: [key, element].
+   * Further usage is such: [[key, element], [key, element], ...] !__
+   * 
+   * __! This does not cause the added elements to be rendered. The associated 'render_elements'
+   * method exists for this purpose. !__
+   * 
+   * Method to append one or many elements to the Renderer's elements list.
+   *
+   * @param {*} __elements: List of elements for appendage. See above notes for formatting.
+   */
   add_elements(__elements) {
     let elements = __elements;
     if (!Array.isArray(elements)) elements = [elements];
@@ -72,10 +93,18 @@ class Renderer {
     });
   }
 
+  /**
+   * Empties the Renderer's element list.
+   */
   clear_elements() {
     this.elements = new Map();
   }
 
+  /**
+   * Return's an element from the Renderer's element list if its given key exists.
+   * @param {*} __key: Key of the element to search.
+   * @returns An element. An error is thrown otherwise.
+   */
   get_element(__key) {
     try {
       return this.elements.get(__key);
@@ -85,6 +114,10 @@ class Renderer {
     }
   }
 
+  /**
+   * Render all of the elements in the Renderer's element list.
+   * @param {*} __frame_timestamp: Timestamp to use for animations.
+   */
   render_elements(__frame_timestamp) {
     this.elements.forEach((element, i) => {
       console.log("Rendering: ", i);
@@ -224,6 +257,9 @@ class Renderer {
 // GENERIC ELEMENTS
 // ====================================================================================
 
+/**
+ * Helper Class for creating homogenous block-like elements for quick rendering.
+ */
 class Block {
   constructor(
     __init_coords,
@@ -294,6 +330,10 @@ class Block {
     return this.container;
   }
 
+  /**
+   * Quick method to change the inner elements of the block with repositioning.
+   * @param {*} __inner: New inner element to use.
+   */
   set_new_inner(__inner) {
     try {
       if (this.sprite) this.sprite.removeChildren();

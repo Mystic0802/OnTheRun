@@ -2,7 +2,15 @@
 // WEBSOCKET
 // ====================================================================================
 
+/**
+ * __! Not to be confused with State (uppercase) which is the enumeration of possible client states !__
+ * 
+ * State instance of the client.
+ * 
+ * Instance of the client-side state Enumeration as per states.js
+ */
 let state = State.INIT;
+// Flag for whether has yet to establish a websocket connection.
 let connected = false;
 // Initialize socket on game path
 // this might change if I figure out how to do multiple socket.io clients.
@@ -28,6 +36,11 @@ if (existing_username && existing_session_id) {
   });
 }
 
+/**
+ * Synchronisation pseudo-callback.
+ * 
+ * Handles the synchronisation response in order to restore state using the received data.
+ */
 socket.on("player_get_response", (__msg) => {
   try {
     console.log(__msg)
@@ -55,6 +68,12 @@ socket.on("player_get_response", (__msg) => {
 // STATE HANDLER
 socket.on("state", handle_state_msg);
 
+/**
+ * Implementation of state updates and associated handling.
+ * 
+ * Input states are processed to determine how the frontend should mutate.
+ * @param {*} __state_val: Raw state enumeration value.
+ */
 function handle_state(__state_val) {
   switch (__state_val) {
     case State.INIT.description:
@@ -79,6 +98,11 @@ function handle_state(__state_val) {
   }
 }
 
+/**
+ * Specifically parses state update messages in order to determine the new state for the client.
+ * @param {*} __state_msg: JSON object received via Websocket.
+ * @returns 
+ */
 function handle_state_msg(__state_msg) {
   console.log(__state_msg);
   if (connected == false) return;
