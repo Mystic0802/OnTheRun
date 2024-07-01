@@ -39,4 +39,3 @@ socket.on("player_create_response", (__msg) => {
   clear_display();
   display_wait(msg_data.name);
 });
-

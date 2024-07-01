@@ -84,7 +84,7 @@ function create_message(__state, __data) {
 // checks whether the game_start state should be done.
 function check_ready() {
   // lobby full logic
-  console.log(`players size: ${players.size}, chaser: ${player_chaser}`)
+  console.log(`players size: ${players.size}, chaser: ${player_chaser}`);
   if (players.size < 4 || !player_chaser) return;
   console.log("reached player cap");
   state = resolve_state(state, Transitions.JOIN_DONE);
@@ -165,7 +165,12 @@ io.on("connection", (socket) => {
   // create player requests
   socket.on("player_create", (__msg, callback) => {
     // don't let people join if not in the join state
-    if (state != State.JOIN) return;
+    if (state != State.JOIN) {
+      console.error(
+        "Cannot create player due to state. Likely display has not yet been connected!"
+      );
+      return;
+    }
     try {
       let msg_data = __msg;
       if (!msg_data) throw new Error("no message received.");
@@ -193,9 +198,16 @@ io.on("connection", (socket) => {
   });
 
   socket.on("chaser_create", (__msg, callback) => {
-    if (state != State.JOIN) return;
+    if (state != State.JOIN) {
+      console.error(
+        "Cannot create player due to state. Likely display has not yet been connected!"
+      );
+      return;
+    }
     // if the chaser is already joined dont allow another
-    if (player_chaser) return;
+    if (player_chaser) {
+      console.error("Cannot create chaser as chaser already exists.");
+    }
     try {
       let msg_data = __msg;
       if (!msg_data) throw new Error("no message received.");
@@ -235,6 +247,13 @@ io.on("connection", (socket) => {
     try {
       console.log(`removing player`);
       let player_uuid = socket_uuid_map.get(socket.id);
+      // check if they are the chaser, and if so, remove them so a new chaser can be created
+      // awkward code because need to check if player object exists before checking uuid attribute
+      if (player_chaser) {
+        if (player_chaser.socket_id == socket.id) {
+          player_chaser = undefined;
+        }
+      }
       // remove records.
       players.delete(player_uuid);
       socket_uuid_map.delete(socket.id);
@@ -275,7 +294,6 @@ server.listen(port);
 let uuid1 = v4();
 let uuid2 = v4();
 let uuid3 = v4();
-let uuid4 = v4();
 players.set(uuid1, new Player("player1", uuid1, null));
 players.set(uuid2, new Player("player2", uuid2, null));
 players.set(uuid3, new Player("player3", uuid3, null));
