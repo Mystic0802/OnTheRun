@@ -36,8 +36,8 @@ const DEFAULT_TEXT_STYLE = new PIXI.TextStyle({
 const BIG_TEXT_STYLE = new PIXI.TextStyle({
   fontFamily: "Roboto Mono",
   fill: "#FFFFFF",
-  fontSize: cnv.offsetWidth * 0.022
-})
+  fontSize: cnv.offsetWidth * 0.022,
+});
 
 let layout_columns = 16;
 let layout_rows = 12;
@@ -76,6 +76,15 @@ class Renderer {
     this.elements = new Map();
   }
 
+  get_element(__key) {
+    try {
+      return this.elements.get(__key);
+    } catch (e) {
+      console.error(`Could not get element with key: ${__key}`);
+      console.error(e);
+    }
+  }
+
   render_elements(__frame_timestamp) {
     this.elements.forEach((element, i) => {
       console.log("Rendering: ", i);
@@ -111,8 +120,78 @@ class Renderer {
   }
 
   MACRO_GAME_START_INIT() {
-    
+    let player_one_block = new Block(
+      [column_value * 1, row_value * 10],
+      [column_value * 2.5, row_value * 1.5],
+      null,
+      PIXI.Sprite.from("../images/PlayerNameTexture.png"),
+      PIXI.Sprite.from("../images/BlockBorder.png"),
+      PIXI.Sprite.from("../images/BlockBackground.png")
+    );
 
+    let player_two_block = new Block(
+      [column_value * 3.5, row_value * 10],
+      [column_value * 2.5, row_value * 1.5],
+      null,
+      PIXI.Sprite.from("../images/PlayerNameTexture.png"),
+      PIXI.Sprite.from("../images/BlockBorder.png"),
+      PIXI.Sprite.from("../images/BlockBackground.png")
+    );
+
+    let player_three_block = new Block(
+      [column_value * 10, row_value * 10],
+      [column_value * 2.5, row_value * 1.5],
+      null,
+      PIXI.Sprite.from("../images/PlayerNameTexture.png"),
+      PIXI.Sprite.from("../images/BlockBorder.png"),
+      PIXI.Sprite.from("../images/BlockBackground.png")
+    );
+
+    let player_four_block = new Block(
+      [column_value * 12.5, row_value * 10],
+      [column_value * 2.5, row_value * 1.5],
+      null,
+      PIXI.Sprite.from("../images/PlayerNameTexture.png"),
+      PIXI.Sprite.from("../images/BlockBorder.png"),
+      PIXI.Sprite.from("../images/BlockBackground.png")
+    );
+
+    let player_chaser_block = new Block(
+      [column_value * 1, row_value * 1],
+      [column_value * 2.5, row_value * 1.5],
+      null,
+      PIXI.Sprite.from("../images/ChaserTexture.png"),
+      PIXI.Sprite.from("../images/BlockBorder.png"),
+      PIXI.Sprite.from("../images/BlockBackground.png")
+    );
+
+    let money_value = new Block(
+      [column_value * 6, row_value * 9.75],
+      [column_value * 4, row_value * 2],
+      null,
+      PIXI.Sprite.from("../images/MoneyTexture.png"),
+      PIXI.Sprite.from("../images/MoneyBorder.png"),
+      PIXI.Sprite.from("../images/MoneyBackground.png")
+    );
+
+    let timer = new Block(
+      [column_value * 11, row_value * 1],
+      [column_value * 4, row_value * 2],
+      new PIXI.Text("2:00", DEFAULT_TEXT_STYLE),
+      PIXI.Sprite.from("../images/TimerTexture.png"),
+      PIXI.Sprite.from("../images/BlockBorder.png"),
+      PIXI.Sprite.from("../images/BlockBackground.png")
+    );
+
+    this.add_elements([
+      ["player_one_block", player_one_block],
+      ["player_two_block", player_two_block],
+      ["player_three_block", player_three_block],
+      ["player_four_block", player_four_block],
+      ["player_chaser_block", player_chaser_block],
+      ["money_value", money_value],
+      ["timer", timer],
+    ]);
   }
 }
 
@@ -162,17 +241,18 @@ class Block {
     let block = new PIXI.Container();
     block.addChild(this.background);
     block.addChild(this.texture_sprite);
-
-    try {
-      // + 4 accounts for border padding
-      // DEFINE SOME TEXT SCALING FUNCTION USING A SCALAR WITH A CONSTANT REDUCTION
-      this.inner.position.set(
-        this.w / 2 - this.inner.width / 2 + 4,
-        this.h / 2 - this.inner.height / 2 + 4
-      );
-      block.addChild(this.inner);
-    } catch (e) {
-      console.error(`Could not add inner element: ${e}`);
+    if (this.inner || this.inner != null) {
+      try {
+        // + 4 accounts for border padding
+        // DEFINE SOME TEXT SCALING FUNCTION USING A SCALAR WITH A CONSTANT REDUCTION
+        this.inner.position.set(
+          this.w / 2 - this.inner.width / 2 + 4,
+          this.h / 2 - this.inner.height / 2 + 4
+        );
+        block.addChild(this.inner);
+      } catch (e) {
+        console.error(`Could not add inner element: ${e}`);
+      }
     }
     block.addChild(this.border);
 
@@ -188,6 +268,36 @@ class Block {
   get sprite() {
     return this.container;
   }
+
+  set_new_inner(__inner) {
+    try {
+      if (this.sprite) this.sprite.removeChildren();
+      console.log(__inner);
+      this.inner = __inner;
+      this.inner.position.set(
+        this.w / 2 - this.inner.width / 2 + 4,
+        this.h / 2 - this.inner.height / 2 + 4
+      );
+      this.sprite.addChild(this.inner);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // set inner(__inner) {
+  //   try {
+  //     if (this.sprite) this.sprite.removeChildren();
+  //     console.log(__inner)
+  //     this.inner = __inner;
+  //     this.inner.position.set(
+  //       this.w / 2 - this.inner.width / 2 + 4,
+  //       this.h / 2 - this.inner.height / 2 + 4
+  //     );
+  //     this.sprite.addChild(this.inner);
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // }
 }
 
 // ====================================================================================
@@ -203,69 +313,6 @@ app.ticker.add((ticker) => {
 // ====================================================================================
 // STATIC ELEMENTS INITIALIZATION | CREATE THE PLAYER BLOCKS!
 // ====================================================================================
-
-let player_one = new Block(
-  [column_value * 1, row_value * 10],
-  [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("GEORGIA", DEFAULT_TEXT_STYLE),
-  PIXI.Sprite.from("../images/PlayerNameTexture.png"),
-  PIXI.Sprite.from("../images/BlockBorder.png"),
-  PIXI.Sprite.from("../images/BlockBackground.png")
-);
-
-let player_two = new Block(
-  [column_value * 3.5, row_value * 10],
-  [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("NATHANIEL", DEFAULT_TEXT_STYLE),
-  PIXI.Sprite.from("../images/PlayerNameTexture.png"),
-  PIXI.Sprite.from("../images/BlockBorder.png"),
-  PIXI.Sprite.from("../images/BlockBackground.png")
-);
-
-let player_three = new Block(
-  [column_value * 10, row_value * 10],
-  [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("JAMES", DEFAULT_TEXT_STYLE),
-  PIXI.Sprite.from("../images/PlayerNameTexture.png"),
-  PIXI.Sprite.from("../images/BlockBorder.png"),
-  PIXI.Sprite.from("../images/BlockBackground.png")
-);
-
-let player_four = new Block(
-  [column_value * 12.5, row_value * 10],
-  [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("ANGUS", DEFAULT_TEXT_STYLE),
-  PIXI.Sprite.from("../images/PlayerNameTexture.png"),
-  PIXI.Sprite.from("../images/BlockBorder.png"),
-  PIXI.Sprite.from("../images/BlockBackground.png")
-);
-
-let money_value = new Block(
-  [column_value * 6, row_value * 9.75],
-  [column_value * 4, row_value * 2],
-  new PIXI.Text("£100,000", DEFAULT_TEXT_STYLE),
-  PIXI.Sprite.from("../images/MoneyTexture.png"),
-  PIXI.Sprite.from("../images/MoneyBorder.png"),
-  PIXI.Sprite.from("../images/MoneyBackground.png")
-);
-
-let player_chaser = new Block(
-  [column_value * 1, row_value * 1],
-  [column_value * 2.5, row_value * 1.5],
-  new PIXI.Text("CRAIG", DEFAULT_TEXT_STYLE),
-  PIXI.Sprite.from("../images/ChaserTexture.png"),
-  PIXI.Sprite.from("../images/BlockBorder.png"),
-  PIXI.Sprite.from("../images/BlockBackground.png")
-);
-
-let timer = new Block(
-  [column_value * 11, row_value * 1],
-  [column_value * 4, row_value * 2],
-  new PIXI.Text("2:00", DEFAULT_TEXT_STYLE),
-  PIXI.Sprite.from("../images/TimerTexture.png"),
-  PIXI.Sprite.from("../images/BlockBorder.png"),
-  PIXI.Sprite.from("../images/BlockBackground.png")
-);
 
 // renderer.add_elements([["player_one", player_one]]);
 // renderer.add_elements("player_two", player_two);

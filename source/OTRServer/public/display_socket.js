@@ -34,6 +34,7 @@ function handle_state_msg(__state_msg) {
     case State.GAME_START.description:
       state = State.GAME_START;
       console.log("Game_Start State Receieved.");
+      console.log(__state_msg.data)
       display_game_start();
       break;
     default:
@@ -74,6 +75,12 @@ function display_join_init() {
 
 function display_game_start() {
   renderer.clear_elements();
+  // add the element spaces, which have empty internal values
+  renderer.MACRO_GAME_START_INIT();
+  // fill in the values using references 
+  console.log(renderer.get_element("player_one_block"))
+  
+  renderer.render_elements();
 }
 
 function handle_new_data(__msg) {
