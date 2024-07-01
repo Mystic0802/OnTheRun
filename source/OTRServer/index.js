@@ -100,7 +100,7 @@ function check_ready() {
 
   let data = {
     player_names: get_player_names(),
-    chaser_name: player_chaser.name
+    chaser_name: player_chaser.name,
   };
   let msg = create_message(state.toString(), data);
   io.emit("state", msg);
@@ -124,7 +124,10 @@ io.on("connection", (socket) => {
       let data = {};
       switch (state.description) {
         case State.GAME_START.description:
-          data = { player_names: get_player_names(), chaser_name: player_chaser.name };
+          data = {
+            player_names: get_player_names(),
+            chaser_name: player_chaser.name,
+          };
       }
       console.log(`get display state: ${state.description}`);
       let msg = create_message(state.toString(), data);
@@ -140,6 +143,7 @@ io.on("connection", (socket) => {
 
   // player recovery requests
   // to-do, actually sync it.
+  // CHASER STUFF, ONLY PLAYER WORKS RN
   socket.on("player_get", (__msg, callback) => {
     try {
       let msg_data = __msg;
@@ -163,6 +167,7 @@ io.on("connection", (socket) => {
 
       let msg = {
         ok: true,
+        state: state.toString(),
         name: player.name,
         session_id: player.uuid,
       };
@@ -304,6 +309,8 @@ server.listen(port);
 let uuid1 = v4();
 let uuid2 = v4();
 let uuid3 = v4();
+// let uuid4 = v4();
 players.set(uuid1, new Player("player1", uuid1, null));
 players.set(uuid2, new Player("player2", uuid2, null));
 players.set(uuid3, new Player("player3", uuid3, null));
+// players.set(uuid4, new Player("player4", uuid4, null));
