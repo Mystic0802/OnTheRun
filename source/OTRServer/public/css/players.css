@@ -1,0 +1,312 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    max-width: 100vw;
+    max-height: 100vh;
+    font-family: "Roboto Mono", monospace;
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+.letter {
+    display: inline-block;
+    line-height: 1em;
+}
+
+/* ==================================================================================== */
+/* LOGIN SCREEN
+/* ==================================================================================== */
+
+
+#wrapper {
+    display: flex;
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+#login-wrapper {
+    display: block;
+    width: calc(100vw/4);
+    height: 100%;
+    align-items: normal;
+    justify-content: center;
+}
+
+#login-hero {
+    display: flex;
+    position: relative;
+    width: 100%;
+    aspect-ratio: calc(445/81);
+    margin: 4em 0;
+}
+
+#login-username {
+    display: flex;
+    position: relative;
+    width: 100%;
+    margin: 4em 0;
+}
+
+#login-username input {
+    height: 100%;
+    width: 100%;
+    outline: none;
+    font-family: "Roboto Mono", monospace;
+    font-size: 2em;
+    text-align: center;
+    padding: 1em 0;
+    color: #FFFFFF;
+    border: none;
+    background: rgb(1, 1, 102);
+    background: linear-gradient(0deg, rgba(1, 1, 102, 1) 0%, rgba(3, 2, 255, 1) 100%);
+    border-radius: 0.5em;
+    border: 4px solid #FFFFFF;
+    transition-duration: 255ms;
+}
+
+#login-username input::placeholder {
+    /* color: #D8DDE1; */
+    color: #9EABB5;
+}
+
+#login-username input:focus {
+    border-color: #010033;
+    transition-duration: 255ms;
+}
+
+#login-submit {
+    display: flex;
+    position: relative;
+    width: 100%;
+    margin: 4em 0;
+    align-items: center;
+    justify-content: center;
+}
+
+#login-button {
+    display: flex;
+    position: relative;
+    font-size: 2em;
+    padding: 1em 2em;
+    background: rgb(1, 1, 102);
+    background: linear-gradient(0deg, rgba(1, 1, 102, 1) 0%, rgba(3, 2, 255, 1) 100%);
+    border-radius: 0.5em;
+    border: 4px solid #D8DDE1;
+    cursor: pointer;
+    transition-duration: 255ms
+}
+
+#login-button:hover {
+    border-color: #6F787F;
+    color: #6F787F;
+}
+
+@media (max-width:480px) {
+    #login-wrapper {
+        width: calc(100vw*0.9);
+
+    }
+}
+
+/* CHASER ONLY =========================================================== */
+/* why do I have to rewrite everything lol */
+
+#c-login-username input {
+    height: 100%;
+    width: 100%;
+    outline: none;
+    font-family: "Roboto Mono", monospace;
+    font-size: 2em;
+    text-align: center;
+    padding: 1em 0;
+    color: #FFFFFF;
+    border: none;
+    background: rgb(212, 9, 12);
+    background: linear-gradient(0deg, rgba(85, 4, 5, 1) 0%, rgba(212, 9, 12, 1) 100%);
+    border-radius: 0.5em;
+    border: 4px solid #FFFFFF;
+    transition-duration: 255ms;
+}
+
+#c-login-username input::placeholder {
+    /* color: #D8DDE1; */
+    color: #9EABB5;
+}
+
+#c-login-username input:focus {
+    border-color: #330000;
+    transition-duration: 255ms;
+}
+
+#c-login-button {
+    display: flex;
+    position: relative;
+    font-size: 2em;
+    padding: 1em 2em;
+    background: rgb(212, 9, 12);
+    background: linear-gradient(0deg, rgba(85, 4, 5, 1) 0%, rgba(212, 9, 12, 1) 100%);
+    border-radius: 0.5em;
+    border: 4px solid #D8DDE1;
+    cursor: pointer;
+    transition-duration: 255ms
+}
+
+#c-login-button:hover {
+    border-color: #6F787F;
+    color: #6F787F;
+}
+
+
+
+/* ==================================================================================== */
+/* WAIT SCREEN
+/* ==================================================================================== */
+
+#wait-wrapper {
+    display: flex;
+    position: relative;
+    width: calc(100vw/4);
+    height: fit-content;
+    margin: 4em 0;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#player-block-wrapper {
+    position: relative;
+    display: flex;
+    aspect-ratio: calc(445/81);
+    width: 100%;
+    margin: 1em 0;
+    align-items: center;
+    justify-content: center;
+}
+
+#player-block-wrapper img {
+    display: block;
+    position: relative;
+    max-width: 100%;
+}
+
+#player-block-text {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 2.22em;
+}
+
+
+@media (max-width:480px) {
+    #wait-wrapper {
+        width: calc(100vw*0.9)
+    }
+
+}
+
+
+/* ==================================================================================== */
+/* WAIT SCREEN
+/* ==================================================================================== */
+
+
+/* ==================================================================================== */
+/* GAME
+/* ==================================================================================== */
+#game-wrapper {
+    display: flex;
+    position: relative;
+    width: calc(100vw/4);
+    height: fit-content;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#game-player-text {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 2.22em;
+}
+
+#game-answer-wrapper {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: fit-content;
+    margin: 4em 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.game-answer-item {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: fit-content;
+    margin: 1em 0;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.game-answer-item-deco {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-answer-item-deco img {
+    display: block;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    
+}
+
+/* Locked Answer dimming effect */
+.game-answer-item-deco-cover {
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #05293F;
+    opacity: 0;
+    z-index: 1;
+    border-radius: 1em;
+    transition-duration: 255ms;
+}
+
+.game-answer-item:hover .game-answer-item-deco-cover {
+    transition-duration: 255ms;
+    opacity: 0.5;
+}
+
+.game-answer-item-text {
+    display: block;
+    width: 100%;
+    position: absolute;
+    font-size: 1.5em;
+    z-index: 2;
+}
+
+@media (max-width:480px) {
+    #game-wrapper {
+        width: calc(100vw*0.9)
+    }
+
+}

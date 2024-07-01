@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OnTheRun</title>
+    <link rel="stylesheet" type="text/css" href="./css/players.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+      integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+      integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+      crossorigin="anonymous"
+    ></script>
+    <script src="anime.min.js"></script>
+    <script src="./states.js"></script>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="init-wrapper">Waiting for game to be instantiated...</div>
+      <div id="login-wrapper">
+        <img id="login-hero" src="./images/PlayerHero.png" />
+        <div id="login-username">
+          <input
+            id="login-username-input"
+            type="text"
+            placeholder="Your Name"
+          />
+        </div>
+        <div id="login-submit">
+          <div id="login-button">Join</div>
+        </div>
+      </div>
+      <div id="wait-wrapper">
+        <div id="player-block-wrapper">
+          <img src="./images/PlayerBlock.png" />
+          <div id="player-block-text"></div>
+        </div>
+        <div id="wait-player-text">Waiting for the other players...</div>
+      </div>
+      <div id="game-wrapper">
+        <div id="player-block-wrapper">
+          <img src="./images/PlayerBlock.png" />
+          <div id="game-player-text"></div>
+        </div>
+        <div id="game-answer-wrapper">
+          <!-- Begin Answer Items -->
+          <div class="game-answer-item">
+            <div class="game-answer-item-deco">
+              <div class="game-answer-item-deco-cover"></div>
+              <img src="./images/AnswerBox.png" />
+            </div>
+            <div class="game-answer-item-text">Long Answer Text Here</div>
+          </div>
+          <div class="game-answer-item">
+            <div class="game-answer-item-deco">
+              <div class="game-answer-item-deco-cover"></div>
+              <img src="./images/AnswerBox.png" />
+            </div>
+            <div class="game-answer-item-text">Long Answer Text Here</div>
+          </div>
+          <div class="game-answer-item">
+            <div class="game-answer-item-deco">
+              <div class="game-answer-item-deco-cover"></div>
+              <img src="./images/AnswerBox.png" />
+            </div>
+            <div class="game-answer-item-text">Long Answer Text Here</div>
+          </div>
+          <div class="game-answer-item">
+            <div class="game-answer-item-deco">
+              <div class="game-answer-item-deco-cover"></div>
+              <img src="./images/AnswerBox.png" />
+            </div>
+            <div class="game-answer-item-text">Long Answer Text Here</div>
+          </div>
+
+          <!-- End Answer Items -->
+        </div>
+      </div>
+    </div>
+    <script src="./universal_util.js"></script>
+    <script src="./universal_render.js"></script>
+    <script src="./player_socket.js"></script>
+  </body>
+</html>
