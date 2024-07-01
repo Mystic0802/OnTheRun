@@ -155,14 +155,29 @@ io.on("connection", (socket) => {
         throw new Error(
           "no session_id given for existing session sync request."
         );
+      // request FORM is valid past this point.
+      console.log(
+        `ok player get request: username:${msg_data.username},session_id:${msg_data.session_id}`
+      );
+      // now check if the session id matches an existing player/chaser.
+
+      // check if the player is the chaser first, with regular player as fallback.
+      if (msg_data.session_id == player_chaser.uuid) {
+        socket.emit("player_get_response", {
+          ok: true,
+          state: state.toString(),
+          name: player_chaser.name,
+          session_id: player_chaser.uuid,
+        });
+        console.log("restored chaser session");
+        return;
+      }
+
       if (!players.has(msg_data.session_id))
         throw new Error(
           `get request with invalid session id: ${msg_data.session_id}`
         );
 
-      console.log(
-        `ok player get request: username:${msg_data.username},session_id:${msg_data.session_id}`
-      );
       let player = players.get(msg_data.session_id);
 
       let msg = {
@@ -172,6 +187,7 @@ io.on("connection", (socket) => {
         session_id: player.uuid,
       };
       socket.emit("player_get_response", msg);
+      console.log("restored player session");
     } catch (e) {
       console.log(`Player_get error: ${e}`);
     }
