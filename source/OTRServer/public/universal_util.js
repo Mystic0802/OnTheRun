@@ -104,7 +104,6 @@ function handle_state(__state_val) {
  * @returns 
  */
 function handle_state_msg(__state_msg) {
-  console.log(__state_msg);
   if (connected == false) return;
   let new_state;
   // Try to extract state from message

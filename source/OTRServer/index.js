@@ -178,7 +178,8 @@ function get_player_names() {
  */
 function check_ready() {
   // lobby full logic
-  console.log(`players size: ${players.size}, chaser: ${player_chaser}`);
+  console.log(`players: ${get_player_names()}, chaser: ${player_chaser.name}`)
+  // console.log(`players size: ${players.size}, chaser: ${player_chaser.name}`);
   if (players.size < 4 || !player_chaser) return;
   console.log("reached player cap");
   state = resolve_state(state, Transitions.JOIN_DONE);
@@ -349,7 +350,7 @@ io.on("connection", (socket) => {
 
       // generate a uuid for the player
       let uuid = v4();
-      // send the response
+      // build the response
       let msg = {
         ok: true,
         name: msg_data.name,
@@ -382,7 +383,6 @@ io.on("connection", (socket) => {
     if (state != State.JOIN) return;
     console.log(`user disconnected: ${socket.id}`);
     try {
-      console.log(`removing player`);
       let player_uuid = socket_uuid_map.get(socket.id);
       // check if they are the chaser, and if so, remove them so a new chaser can be created
       // awkward code because need to check if player object exists before checking uuid attribute
@@ -392,11 +392,30 @@ io.on("connection", (socket) => {
         }
       }
       // remove records.
+      console.log(`removing player`);
       players.delete(player_uuid);
       socket_uuid_map.delete(socket.id);
     } catch (e) {
       console.log(`disconnect error: ${e}`);
     }
+  });
+
+  // ====================================================================================
+  // ADMIN DATA REQS
+  // ====================================================================================
+
+  /**
+   * Basic Admin Sync
+   *
+   * The current concept is that the admin should figure out what data it needs,
+   * and make its requests independently, rather than trying to figure it out on the server end.
+   */
+  socket.on("admin_get", (__msg, callback) => {
+    console.log(`admin connected on socket: ${socket.id}`);
+    let msg = {
+      state: state.toString(),
+    };
+    socket.emit("admin_get_response", msg);
   });
 });
 
@@ -404,12 +423,15 @@ io.on("connection", (socket) => {
 // Server Start + Routes
 // ====================================================================================
 
+// add all the route stems into the main app.
 var displayRouter = require("./routes/display");
 app.use("/display", displayRouter);
 var playerRouter = require("./routes/player");
 app.use("/", playerRouter);
 var chaserRouter = require("./routes/chaser");
 app.use("/chaser", chaserRouter);
+var adminRouter = require("./routes/admin");
+app.use("/admin", adminRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
 // app.set('views', path.join(__dirname, 'views'))
