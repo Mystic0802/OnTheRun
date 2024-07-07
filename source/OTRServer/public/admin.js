@@ -3,46 +3,48 @@
 // ====================================================================================
 
 class AdminPlayerInterface {
-    constructor(__display_name, __money_score = 0) {
-        this.display_name = __display_name
-        this.money_score = __money_score
-    }
+  constructor(__display_name, __money_score = 0) {
+    this.display_name = __display_name;
+    this.money_score = __money_score;
+  }
 }
 
 class SettingsHandler {
-    /**
-     * Declare all the settings for clarity. We don't have the values for them yet.
-     * 
-     * Based on state, we make requests to the server for values.
-     * Gradually this will fill all the missing values.
-     * 
-    */ 
+  /**
+   * Declare all the settings for clarity. We don't have the values for them yet.
+   *
+   * Based on state, we make requests to the server for values.
+   * Gradually this will fill all the missing values.
+   *
+   */
 
-    constructor() {
-        this.game_state = State.NONE
-        this.player_interface_list = [];
-        this.chaser_interface;
+  constructor() {
+    this.game_state = State.NONE;
+    this.player_interface_list = [];
+    this.chaser_interface;
 
-        this.working_balance = 0;
-    }
+    this.working_balance = 0;
+  }
 
-    get_settings() {
+  get_settings() {}
 
+  handle_correct() {
+    if (QuickFireStates.includes(state) == false) return;
+    console.log("correct okay here.");
+  }
 
-    }
+  handle_incorrect() {
+    if (QuickFireStates.includes(state) == false) return;
+    console.log("incorrect okay here.");
+  }
 
-    handle_correct() {
-      if (state != State.)
-    }
-    
-    handle_incorrect() {
-
-    }
-
+  handle_undo() {
+    if (QuickFireStates.includes(state) == false) return;
+    console.log("undo okay here.");
+  }
 }
 
-let settings = new SettingsHandler()
-
+let settings = new SettingsHandler();
 
 // ====================================================================================
 // WEBSOCKET
@@ -50,9 +52,9 @@ let settings = new SettingsHandler()
 
 /**
  * __! Not to be confused with State (uppercase) which is the enumeration of possible client states !__
- * 
+ *
  * State instance of the client.
- * 
+ *
  * Instance of the client-side state Enumeration as per states.js
  */
 let state = State.INIT;
@@ -70,15 +72,15 @@ socket.on("connect", () => {
   connected = true;
 
   // make client request to sync state.
-  socket.emit("admin_get", {})
+  socket.emit("admin_get", {});
 });
 
 // manual state request sync.
 socket.on("admin_get_response", (__msg) => {
-    let msg = __msg
-    console.log("Received Sync, handling admin state...")
-    handle_state_msg(msg)
-})
+  let msg = __msg;
+  console.log("Received Sync, handling admin state...");
+  handle_state_msg(msg);
+});
 
 // ====================================================================================
 // STATE LOGIC
@@ -89,7 +91,7 @@ socket.on("state", handle_state_msg);
 
 /**
  * Implementation of state updates and associated handling.
- * 
+ *
  * Input states are processed to determine how the frontend should mutate.
  * @param {*} __state_val: Raw state enumeration value.
  */
@@ -117,10 +119,10 @@ function handle_state(__state_val) {
 
 /**
  * Specifically parses state update messages in order to determine the new state for the client.
- * 
+ *
  * Calls the state changing procedure automatically if given a valid message.
  * @param {*} __state_msg: JSON object received via Websocket.
- * @returns 
+ * @returns
  */
 function handle_state_msg(__state_msg) {
   if (connected == false) return;
@@ -134,20 +136,51 @@ function handle_state_msg(__state_msg) {
     console.error(e);
   }
   let state_val = new_state[0].replace(/^\(+|\)+$/g, "");
-  handle_state(state_val)
+  handle_state(state_val);
 }
 
 // ====================================================================================
 // RENDERING AND EVENTS
 // ====================================================================================
 
-const correct_answer_btn = document.getElementById("answer-correct")
-const incorrect_answer_btn = document.getElementById("answer-incorrect")
+const correct_answer_btn = document.getElementById("answer-correct");
+const incorrect_answer_btn = document.getElementById("answer-incorrect");
+const undo_answer_btn = document.getElementById("answer-undo");
 
 correct_answer_btn.addEventListener("click", () => {
-  console.log("correct")
-})
+  state = State.QUICKFIRE_ONE;
+
+  settings.handle_correct();
+});
 
 incorrect_answer_btn.addEventListener("click", () => {
-  console.log("incorrect")
-})
+  state = State.QUICKFIRE_ONE;
+
+  settings.handle_incorrect();
+});
+
+undo_answer_btn.addEventListener("click", () => {
+  state = State.QUICKFIRE_ONE;
+
+  settings.handle_undo();
+});
+
+// ====================================================================================
+// KEYBIND HANDLING
+// ====================================================================================
+
+addEventListener("keypress", (__key_id) => {
+  switch (__key_id.key) {
+    case "z":
+      settings.handle_correct();
+      break;
+    case "x":
+      settings.handle_incorrect();
+      break;
+    case "c":
+      settings.handle_undo();
+      break;
+    default:
+      return;
+  }
+});

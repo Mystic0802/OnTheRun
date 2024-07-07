@@ -37,3 +37,7 @@ body {
 #answer-incorrect {
   background-color: rgb(150, 27, 27);
 }
+
+#answer-undo {
+  background-color: rgb(27, 39, 150);
+}
