@@ -13,6 +13,7 @@
     "html-express-js": "^2.0.0",
     "node": "^22.2.0",
     "node-http": "^0.0.5",
+    "socket.io": "^4.7.5",
     "uuid": "^9.0.1"
   }
 }

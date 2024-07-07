@@ -22,12 +22,23 @@ class SettingsHandler {
         this.game_state = State.NONE
         this.player_interface_list = [];
         this.chaser_interface;
+
+        this.working_balance = 0;
     }
 
     get_settings() {
 
 
     }
+
+    handle_correct() {
+      if (state != State.)
+    }
+    
+    handle_incorrect() {
+
+    }
+
 }
 
 let settings = new SettingsHandler()
@@ -83,6 +94,8 @@ socket.on("state", handle_state_msg);
  * @param {*} __state_val: Raw state enumeration value.
  */
 function handle_state(__state_val) {
+  // boiler-plate state code.
+  // change to have state-wise data requesting.
   switch (__state_val) {
     case State.INIT.description:
       state = State.INIT;
@@ -123,3 +136,18 @@ function handle_state_msg(__state_msg) {
   let state_val = new_state[0].replace(/^\(+|\)+$/g, "");
   handle_state(state_val)
 }
+
+// ====================================================================================
+// RENDERING AND EVENTS
+// ====================================================================================
+
+const correct_answer_btn = document.getElementById("answer-correct")
+const incorrect_answer_btn = document.getElementById("answer-incorrect")
+
+correct_answer_btn.addEventListener("click", () => {
+  console.log("correct")
+})
+
+incorrect_answer_btn.addEventListener("click", () => {
+  console.log("incorrect")
+})

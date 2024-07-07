@@ -7,6 +7,10 @@ const State = Object.freeze({
     JOIN: Symbol("state_join"),
     GAME_START: Symbol("state_game_start"),
     GAME_TRANSITION: Symbol("state_game_transition"),
+    QUICKFIRE_ONE: Symbol("state_quickfire_one"),
+    QUICKFIRE_TWO: Symbol("state_quickfire_two"),
+    QUICKFIRE_THREE: Symbol("state_quickfire_three"),
+    QUICKFIRE_FOUR: Symbol("state_quickfire_four"),
     NONE: Symbol("state_none")
   });
 

@@ -4,17 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OnTheRun Admin Panel</title>
-    
+    <link rel="stylesheet" type="text/css" href="./css/admin.css" />
     <!--JS IMPORTS-->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+      integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+      integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+      crossorigin="anonymous"
+    ></script>
     <script src="./states.js"></script>
   </head>
   <body>
-    <h1>Admin Style</h1>
+    <div id="wrapper">
+      <div class="answer-button" id="answer-correct">
+        <div class="answer-text">Correct</div>
+        <div class="answer-text">(key: z)</div>
+      </div>
+      <div class="answer-button" id="answer-incorrect">
+        <div class="answer-text">Incorrect</div>
+        <div class="answer-text">(key: x)</div>
+      </div>
+    </div>
 
-    <script src="./admin_socket.js"></script>
-
+    <script src="./admin.js"></script>
   </body>
 </html>
