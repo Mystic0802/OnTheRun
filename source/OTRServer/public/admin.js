@@ -18,7 +18,9 @@ class SettingsHandler {
    *
    */
 
-  constructor() {
+  constructor(__socket) {
+    this.socket = __socket
+
     this.game_state = State.NONE;
     this.player_interface_list = [];
     this.chaser_interface;
@@ -26,25 +28,32 @@ class SettingsHandler {
     this.working_balance = 0;
   }
 
-  get_settings() {}
+  get_settings(__state) {
+    switch(__state) {
+      
+    }
+
+  }
 
   handle_correct() {
     if (QuickFireStates.includes(state) == false) return;
     console.log("correct okay here.");
+    this.socket.emit("admin_quickfire_correct", {})
   }
 
   handle_incorrect() {
     if (QuickFireStates.includes(state) == false) return;
     console.log("incorrect okay here.");
+    this.socket.emit("admin_quickfire_incorrect", {})
   }
 
   handle_undo() {
     if (QuickFireStates.includes(state) == false) return;
     console.log("undo okay here.");
+    this.socket.emit("admin_quickfire_undo", {})
   }
 }
 
-let settings = new SettingsHandler();
 
 // ====================================================================================
 // WEBSOCKET
@@ -82,6 +91,9 @@ socket.on("admin_get_response", (__msg) => {
   handle_state_msg(msg);
 });
 
+
+let settings = new SettingsHandler(socket);
+
 // ====================================================================================
 // STATE LOGIC
 // ====================================================================================
@@ -113,8 +125,9 @@ function handle_state(__state_val) {
       break;
     default:
       console.error(`Unrecognised State: ${state_val}`);
-      break;
+      return;
   }
+  settings.get_settings(__state_val)
 }
 
 /**

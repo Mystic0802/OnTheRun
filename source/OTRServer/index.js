@@ -68,6 +68,11 @@ const State = Object.freeze({
   JOIN: Symbol("state_join"),
   GAME_START: Symbol("state_game_start"),
   GAME_TRANSITION: Symbol("state_game_transition"),
+  QUICKFIRE_ONE: Symbol("state_quickfire_one"),
+  QUICKFIRE_TWO: Symbol("state_quickfire_two"),
+  QUICKFIRE_THREE: Symbol("state_quickfire_three"),
+  QUICKFIRE_FOUR: Symbol("state_quickfire_four"),
+  NONE: Symbol("state_none"),
 });
 
 /**
@@ -139,6 +144,10 @@ let player_chaser;
  * Utility hashmap that maps Socket.io/Websocket UUIDs of clients onto their UUID.
  */
 let socket_uuid_map = new Map();
+
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+let money_score = 0
 
 // ====================================================================================
 // Websocket Logic
@@ -417,6 +426,24 @@ io.on("connection", (socket) => {
     };
     socket.emit("admin_get_response", msg);
   });
+
+  /**
+   * Admin Quickfire Stuff
+   * 
+   */
+  socket.on("admin_quickfire_correct", (__msg, callback) => {
+    console.log("correct pressed")
+    money_score = money_score + 1000
+    
+
+  })
+  socket.on("admin_quickfire_incorrect", (__msg, callback) => {
+    console.log("incorrect pressed")
+  })
+  socket.on("admin_quickfire_undo", (__msg, callback) => {
+    console.log("undo pressed")
+    money_score = money_score - 1000
+  })
 });
 
 // ====================================================================================
@@ -431,6 +458,7 @@ app.use("/", playerRouter);
 var chaserRouter = require("./routes/chaser");
 app.use("/chaser", chaserRouter);
 var adminRouter = require("./routes/admin");
+const { callbackify } = require("util");
 app.use("/admin", adminRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
