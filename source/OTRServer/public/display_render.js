@@ -251,6 +251,15 @@ class Renderer {
       .get("money_value")
       .set_new_inner(new PIXI.Text(__money_value, DEFAULT_TEXT_STYLE));
   }
+
+  // ====================================================================================
+  // ANIMATION AND DYNAMIC STUFF
+  // ====================================================================================
+  update_score(__old_score, __new_score) {
+    let fmt = `£${__new_score}`
+    this.elements.get("money_value").set_new_inner(new PIXI.Text(fmt, BIG_TEXT_STYLE))
+  }
+
 }
 
 // ====================================================================================

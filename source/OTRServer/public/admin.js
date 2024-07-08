@@ -26,15 +26,29 @@ class SettingsHandler {
     this.chaser_interface;
 
     this.working_balance = 0;
+
+    // binding internal request handlers.
+    this.socket.on("admin_res_get_start", this.response_get_start)
   }
 
   get_settings(__state) {
+    console.log("get settings", __state)
     switch(__state) {
-      
+      case State.GAME_START.description:
+        this.socket.emit("admin_req_get_start", {})
+        break
+      default:
+        break
     }
 
   }
 
+  // Response Handlers
+  response_get_start(__msg) {
+    console.log(__msg)
+  }
+
+  // GUI Handlers
   handle_correct() {
     if (QuickFireStates.includes(state) == false) return;
     console.log("correct okay here.");
@@ -109,7 +123,6 @@ socket.on("state", handle_state_msg);
  */
 function handle_state(__state_val) {
   // boiler-plate state code.
-  // change to have state-wise data requesting.
   switch (__state_val) {
     case State.INIT.description:
       state = State.INIT;
@@ -127,7 +140,6 @@ function handle_state(__state_val) {
       console.error(`Unrecognised State: ${state_val}`);
       return;
   }
-  settings.get_settings(__state_val)
 }
 
 /**
@@ -150,6 +162,10 @@ function handle_state_msg(__state_msg) {
   }
   let state_val = new_state[0].replace(/^\(+|\)+$/g, "");
   handle_state(state_val);
+  // Admin specific state stuff.
+  // State-wise data requesting
+  settings.get_settings(state_val)
+
 }
 
 // ====================================================================================

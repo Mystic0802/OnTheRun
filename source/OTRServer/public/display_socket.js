@@ -58,8 +58,6 @@ socket.on("connect", () => {
 });
 // Relay state messages to the handle state method.
 socket.on("state", handle_state_msg);
-// Relay un-state-specified data to the handle data method.
-socket.on("display_data", handle_new_data);
 
 //
 //
@@ -97,6 +95,6 @@ function display_game_start(__state_data) {
   }
 }
 
-function handle_new_data(__msg) {
-  console.log("b");
-}
+socket.on("display_money_update", (__msg, callback) => {
+  renderer.update_score(__msg.old, __msg.new)
+})

@@ -428,21 +428,32 @@ io.on("connection", (socket) => {
   });
 
   /**
+   * Quick + Small Data Requests
+   */
+  socket.on("admin_req_get_start", (__msg, callback) => {
+    socket.emit("admin_res_get_start", {
+      player_data: [...players.values()],
+      chaser_data: player_chaser
+    })
+  })
+
+  /**
    * Admin Quickfire Stuff
    * 
    */
   socket.on("admin_quickfire_correct", (__msg, callback) => {
-    console.log("correct pressed")
+    let old_score = money_score
     money_score = money_score + 1000
-    
-
+    io.emit("display_money_update", {old: old_score, new: money_score})
   })
   socket.on("admin_quickfire_incorrect", (__msg, callback) => {
     console.log("incorrect pressed")
   })
   socket.on("admin_quickfire_undo", (__msg, callback) => {
-    console.log("undo pressed")
+    let old_score = money_score
     money_score = money_score - 1000
+    io.emit("display_money_update", {old: old_score, new: money_score})
+  
   })
 });
 
@@ -458,7 +469,6 @@ app.use("/", playerRouter);
 var chaserRouter = require("./routes/chaser");
 app.use("/chaser", chaserRouter);
 var adminRouter = require("./routes/admin");
-const { callbackify } = require("util");
 app.use("/admin", adminRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -481,8 +491,15 @@ server.listen(port);
 let uuid1 = v4();
 let uuid2 = v4();
 let uuid3 = v4();
-// let uuid4 = v4();
+let uuid4 = v4();
 players.set(uuid1, new Player("player1", uuid1, null));
 players.set(uuid2, new Player("player2", uuid2, null));
 players.set(uuid3, new Player("player3", uuid3, null));
-// players.set(uuid4, new Player("player4", uuid4, null));
+players.set(uuid4, new Player("player4", uuid4, null));
+
+let uuid_chaser = v4();
+player_chaser = new Player("chaser", uuid_chaser, null);
+
+state = State.GAME_START
+let msg = create_message(state, {})
+io.emit("state", msg)
