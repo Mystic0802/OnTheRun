@@ -51,19 +51,16 @@ class SettingsHandler {
   // GUI Handlers
   handle_correct() {
     if (QuickFireStates.includes(state) == false) return;
-    console.log("correct okay here.");
     this.socket.emit("admin_quickfire_correct", {})
   }
 
   handle_incorrect() {
     if (QuickFireStates.includes(state) == false) return;
-    console.log("incorrect okay here.");
     this.socket.emit("admin_quickfire_incorrect", {})
   }
 
   handle_undo() {
     if (QuickFireStates.includes(state) == false) return;
-    console.log("undo okay here.");
     this.socket.emit("admin_quickfire_undo", {})
   }
 }

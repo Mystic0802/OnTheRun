@@ -10,22 +10,34 @@ body {
 }
 
 #wrapper {
-  display: flex;
+  display: grid;
   position: relative;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
   align-items: center;
   justify-content: center;
+  grid-template-rows: 25% 1fr;
+}
+
+.button-container {
+  position: relative;
+  display: flex;
+  width: 90vw;
+  height: 90vh;
+  margin: auto;
+
 }
 
 .answer-button {
   position: relative;
+  height: fit-content;
+  width: fit-content;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2em 4em;
-  margin: 2em;
+  margin: 2em 1em;
   flex-direction: column;
   cursor: pointer;
 }
@@ -40,4 +52,34 @@ body {
 
 #answer-undo {
   background-color: rgb(27, 39, 150);
+}
+
+.state-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: fit-content;
+  width: fit-content;
+  justify-content: center;
+  padding: 4em 6em;
+  margin: 2em 1em;
+  flex-direction: column;
+  cursor: pointer;
+
+  background-color: rgb(99, 98, 109);
+}
+
+.state-text-big {
+  font-size: 1.2em;
+  font-weight: 700
+}
+
+#teleprompt-wrapper {
+  position: relative;
+  display: flex;
+  background-color: rgb(99, 98, 109);
+  height: 95%;
+  width: 60vw;
+  align-items: center;
+  justify-content: center;
 }

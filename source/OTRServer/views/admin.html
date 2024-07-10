@@ -24,18 +24,34 @@
   </head>
   <body>
     <div id="wrapper">
-      <div class="answer-button" id="answer-correct">
-        <div class="answer-text">Correct</div>
-        <div class="answer-text">(key: z)</div>
+      <div class="button-container">
+        <div class="answer-button" id="answer-correct">
+          <div class="answer-text">Correct</div>
+          <div class="answer-text">(key: z)</div>
+        </div>
+        <div class="answer-button" id="answer-incorrect">
+          <div class="answer-text">Incorrect</div>
+          <div class="answer-text">(key: x)</div>
+        </div>
+        <div class="answer-button" id="answer-undo">
+          <div class="answer-text">-1000</div>
+          <div class="answer-text">(key: c)</div>
+        </div>
+        <div class="state-button" id="previous-state">
+          <div>Previous State:</div>
+          <div class="state-text-big">UNKNOWN</div>
+          <div>
+            <span style="color: rgb(150, 27, 27)">UNSTABLE!</span>(key: q)
+          </div>
+        </div>
+        <div class="state-button" style="cursor:default">Current State: <span id="current-state">UNKNOWN</span></div>
+        <div class="state-button" id="next-state">
+          <div>Next State:</div>
+          <div class="state-text-big">UNKNOWN</div>
+          <div>(key: space)</div>
+        </div>
       </div>
-      <div class="answer-button" id="answer-incorrect">
-        <div class="answer-text">Incorrect</div>
-        <div class="answer-text">(key: x)</div>
-      </div>
-      <div class="answer-button" id="answer-undo">
-        <div class="answer-text">Undo</div>
-        <div class="answer-text">(key: c)</div>
-      </div>
+      <div id="teleprompt-wrapper">Test Text</div>
     </div>
 
     <script src="./admin.js"></script>
