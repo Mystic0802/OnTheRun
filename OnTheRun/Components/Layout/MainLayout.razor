@@ -1,0 +1,48 @@
+﻿@inherits LayoutComponentBase
+
+<div class="main-layout">
+    <header>
+        <h1>The Chase Game</h1>
+    </header>
+
+    <main>
+        @Body
+    </main>
+
+    <footer>
+        <p>&copy; 2024 The Chase Game</p>
+    </footer>
+</div>
+
+<style>
+    .main-layout {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 20px;
+    }
+
+    header {
+        background-color: #0078D7;
+        color: white;
+        padding: 10px 0;
+    }
+
+    footer {
+        margin-top: 20px;
+        font-size: 0.9em;
+        color: gray;
+    }
+
+    .validation-error {
+        color: red;
+        font-weight: bold;
+        margin-top: 10px;
+        font-size: 0.9em;
+    }
+</style>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

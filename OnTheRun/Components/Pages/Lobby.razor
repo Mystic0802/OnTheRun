@@ -1,0 +1,29 @@
+﻿@page "/Lobby"
+
+@inject NavigationManager NavigationManager
+
+<h3>Lobby</h3>
+<p>Welcome, @Name!</p>
+<p>Join Code: @JoinCode</p>
+
+<p class="validation-error">@ErrorMessage</p>
+
+@code {
+    [Parameter]
+    public string JoinCode { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        JoinCode = query["joinCode"] ?? string.Empty;
+        Name = query["name"] ?? string.Empty;
+
+    }
+}
