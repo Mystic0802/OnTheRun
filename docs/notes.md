@@ -1,6 +1,6 @@
 # Architecture
 
-One node application that can be ran from the command line.
+One Blazor server application that can be ran from the command line.
 
 ## Frontend
 
@@ -14,15 +14,16 @@ Don't use a framework, as there is no point. Canvas will handle everything, phon
 
 - Phone UI
 - Main Screen UI
+    - Individual rounds UI (Cashbuilder, Head to Head & Final Chase)
 - Admin UI
 
 ## Backend
 
-Node is the server runtime. Express for routing and static/dynamic serving.
+Blazor server application utilises SignalR for server-to-client communication (websockets!!).
 
 Admin port/subdomain that is seperate from the phone URL.
 
-Develop with the intention of running one game at a time, therefore we don't need a multi-game system using a code.
+Develop with the intention of running multiple games at a time.
 
 
 # Rulesets
