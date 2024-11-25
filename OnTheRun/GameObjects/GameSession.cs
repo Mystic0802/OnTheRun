@@ -8,7 +8,7 @@ namespace OnTheRun.GameObjects
 
         public string GameId { get; }
         public List<Player> Players { get; } = new();
-        public Player Chaser { get; }
+        public Player Chaser { get; private set; }
         public int MaxPlayers { get; } = 5;
         public GameState CurrentState { get; private set; } = GameState.Lobby;
 
@@ -30,8 +30,26 @@ namespace OnTheRun.GameObjects
         public void RemovePlayer(Player player)
         {
             if (!Players.Any())
-                throw new InvalidOperationException("No Other Players Exist");
+                throw new InvalidOperationException("No other players exist.");
             Players.Remove(player);
+        }
+
+        public void SetChaser(Player player)
+        {
+            if (Chaser == player)
+                throw new InvalidOperationException("Player is already the Chaser.");
+
+            if(!Players.Contains(player))
+                throw new InvalidOperationException("Player is not in this game session.");
+
+            if(Chaser != null)
+            {
+                Chaser.IsChaser = false;
+                Players.Add(Chaser);
+            }
+            Players.Remove(player);
+            player.IsChaser = true;
+            Chaser = player;
         }
 
         #endregion
@@ -43,10 +61,6 @@ namespace OnTheRun.GameObjects
 
             CurrentState = GameState.Cashbuilder;
         }
-
-
-
-
 
         private readonly IHubContext<GameHub> _hubContext;
         public GameSession(IHubContext<GameHub> hubContext)

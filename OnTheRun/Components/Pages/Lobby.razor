@@ -1,29 +1,108 @@
 ﻿@page "/Lobby"
+@using OnTheRun.GameObjects
 
+@inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
 <h3>Lobby</h3>
 <p>Welcome, @Name!</p>
-<p>Join Code: @JoinCode</p>
+<p>Join Code: @GameId</p>
 
-<p class="validation-error">@ErrorMessage</p>
+<div>
+    <h4>Players</h4>
+    <ul id="playerList">
+        @foreach (var player in Players)
+        {
+            <li>@player.Name</li>
+        }
+    </ul>
+
+    <h4>Chasers</h4>
+    <ul id="chaserList">
+        @if (Chaser != null)
+        {
+            <li>@Chaser.Name</li>
+        }
+    </ul>
+</div>
+
+<button @onclick="OnSwitchTeamClick">Switch Team</button>
+
+<p>@ErrorMessage</p>
 
 @code {
     [Parameter]
-    public string JoinCode { get; set; } = string.Empty;
+    public string GameId { get; set; } = string.Empty;
 
     [Parameter]
     public string Name { get; set; } = string.Empty;
 
     private string ErrorMessage { get; set; } = string.Empty;
 
-    protected override void OnParametersSet()
+    private List<Player> Players { get; set; } = new List<Player>();
+    private Player? Chaser { get; set; }
+
+    private static Lobby? Instance;
+
+    protected override async Task OnInitializedAsync()
     {
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        Console.WriteLine("OnInitializedAsync called");
+        Instance = this;
 
-        JoinCode = query["joinCode"] ?? string.Empty;
-        Name = query["name"] ?? string.Empty;
+        Name = await JS.InvokeAsync<string>("getCookie", "Name");
+        GameId = await JS.InvokeAsync<string>("getCookie", "GameId");
 
+        // Request the initial game state for this player
+        await JS.InvokeVoidAsync("invokeHubMethod", "GetGameState", GameId);
+    }
+
+    // For new players joining, this is almost always called before the page is initialised.
+    [JSInvokable]
+    public static void OnPlayerJoined(Player player, List<Player> players)
+    {
+        if (Instance != null)
+        {
+            Instance.ErrorMessage = $"{player.Name} has joined the game!";
+            Instance.Players = players;
+            Instance.InvokeAsync(Instance.StateHasChanged);
+        }
+    }
+
+    private async Task OnSwitchTeamClick() =>
+        await JS.InvokeVoidAsync("invokeHubMethod", "SwitchTeam", GameId, Name);
+
+    [JSInvokable]
+    public static void OnPlayerUpdated(Player player, string update)
+    {
+        if (Instance == null) return;
+
+        if (update == "SwitchTeam")
+        {
+
+            if (player.IsChaser)
+            {
+                Instance.Players.Remove(player);
+                Instance.Chaser = player;
+            }
+            else
+            {
+                Instance.Chaser = null;
+                Instance.Players.Add(player);
+            }
+            Instance.InvokeAsync(Instance.StateHasChanged);
+
+            // Note to self: Currently only the browser the button is pressed on gets the updated team. Instance doesn't seem to work as expected.
+        }
+    }
+
+    [JSInvokable]
+    public static void OnInitialiseGameState(List<Player> players, Player chaser)
+    {
+        if (Instance != null)
+        {
+            Instance.Players = players;
+            Instance.Chaser = chaser;
+            Instance.StateHasChanged();
+        }
     }
 }

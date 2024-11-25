@@ -3,8 +3,14 @@
 async function startConnection(hubUrl) {
     connection = new signalR.HubConnectionBuilder().withUrl(hubUrl).build();
 
-    connection.on("PlayerJoined", (player) => {
-        DotNet.invokeMethodAsync("OnTheRun.Components.Pages", "OnPlayerJoined", player);
+    connection.on("PlayerJoined", (player, players) => {
+        DotNet.invokeMethodAsync("OnTheRun", "OnPlayerJoined", player, players);
+    });
+    connection.on("PlayerUpdated", (player, update) => {
+        DotNet.invokeMethodAsync("OnTheRun", "OnPlayerUpdated", player, update);
+    });
+    connection.on("InitialiseGameState", (players, chaser) => {
+        DotNet.invokeMethodAsync("OnTheRun", "OnInitialiseGameState", players, chaser);
     });
 
     try {
@@ -15,7 +21,7 @@ async function startConnection(hubUrl) {
         setTimeout(() => startConnection(hubUrl), 5000);
     }
 
-    return connection;
+    //return connection;
 }
 
 async function invokeHubMethod(methodName, ...args) {
@@ -30,5 +36,3 @@ async function invokeHubMethod(methodName, ...args) {
     }
 }
 
-// Expose the function globally
-window.startConnection = startConnection;

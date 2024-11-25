@@ -1,5 +1,6 @@
 using OnTheRun.Components;
 using OnTheRun.GameObjects;
+using OnTheRun.GameObjects.Services;
 
 namespace OnTheRun
 {
@@ -13,7 +14,11 @@ namespace OnTheRun
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            builder.Services.AddServerSideBlazor()
+                .AddCircuitOptions(options => options.DetailedErrors = true); // DEVELOPMENT ONLY
+
             builder.Services.AddSingleton<GameSessionManager>();
+            builder.Services.AddSingleton<GameService>();
 
             var app = builder.Build();
 

@@ -32,7 +32,7 @@ namespace OnTheRun.GameObjects
             }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-            await Clients.Group(gameId).SendAsync("PlayerJoined", player);
+            await Clients.Group(gameId).SendAsync("PlayerJoined", player, gameSession.Players);
         }
 
         public async Task LeaveGame(string gameId, string playerName, bool kicked = false)
@@ -55,32 +55,35 @@ namespace OnTheRun.GameObjects
             await Clients.Group(gameId).SendAsync(clientMsg, playerName);
         }
 
-        //public async Task SwitchTeam(string gameId, string playerName, bool isChaser = false)
-        //{
-        //    var gameSession = _gameSessionManager.GetGame(gameId);
-        //    if (gameSession == null)
-        //        throw new HubException("Game not found.");
+        public async Task SwitchTeam(string gameId, string playerName)
+        {
+            var gameSession = _gameSessionManager.GetGame(gameId);
+            if (gameSession == null)
+                throw new HubException("Game not found.");
 
-        //    if (!gameSession.Players.Any())
-        //        throw new HubException("No players found.");
-
-        //    var player = gameSession.Players.FirstOrDefault(p => p.Name == playerName, null);
-        //    if (player == null)
-        //        throw new HubException($"'{playerName}' not found");
+            if (!gameSession.Players.Any())
+                throw new HubException("No players found.");
 
 
-        //    player.IsChaser = isChaser;
-        //    await Clients.Group(gameId).SendAsync("SwitchTeam", player);
-        //}
 
-        //public async Task StartGame(string gameId)
-        //{
-        //    var gameSession = _gameSessionManager.GetGame(gameId);
-        //    if (gameSession == null)
-        //        throw new HubException("Game not found.");
+            var player = gameSession.Players.FirstOrDefault(p => p.Name == playerName, null) ?? throw new HubException($"'{playerName}' not found");
 
-        //    gameSession.StartGame();
-        //    await Clients.Group(gameId).SendAsync("GameStarted");
-        //}
+            lock (gameSession)
+            {
+                gameSession.SetChaser(player);
+
+            }
+            await Clients.Group(gameId).SendAsync("PlayerUpdated", player, "SwitchTeam");
+        }
+
+        public async Task GetGameState(string gameId)
+        {
+            var gameSession = _gameSessionManager.GetGame(gameId);
+            if (gameSession == null)
+                throw new HubException("Game not found.");
+
+            
+            await Clients.Caller.SendAsync("InitialiseGameState", gameSession.Players, gameSession.Chaser);
+        }
     }
 }
