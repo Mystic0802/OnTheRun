@@ -1,7 +1,9 @@
 ﻿@page "/"
+@using OnTheRun.GameObjects.Services
 
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+@inject GameService gameService
 
 <h3>Welcome to The Chase Game!</h3>
 
@@ -12,7 +14,7 @@
 
 <div>
     <label for="joinCode">Enter Join Code:</label>
-    <input id="joinCode" @bind="JoinCode" @bind:event="oninput" placeholder="e.g., ABCD" />
+    <input id="joinCode" @bind="GameId" @bind:event="oninput" placeholder="e.g., ABCD" />
 </div>
 
 <button @onclick="JoinGame" disabled="@IsJoinDisabled">Join</button>
@@ -26,53 +28,17 @@
 
 @code {
     private string Name { get; set; } = string.Empty;
-    private string JoinCode { get; set; } = string.Empty;
+    private string GameId { get; set; } = string.Empty;
     private string StatusMessage { get; set; } = string.Empty;
 
-    private bool IsJoinDisabled => string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(JoinCode);
+    private bool IsJoinDisabled => string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(GameId);
 
-    private IJSObjectReference? _hubConnection;
     private bool _isInitialized = false;
 
 
-    // This should probably be changed in the future. A signalR connection is established with anyone that vists the home page. Likely performance & security risk
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_isInitialized)
-        {
-            try
-            {
-                _hubConnection = await JS.InvokeAsync<IJSObjectReference>("startConnection", "/gamehub");
-                _isInitialized = true;
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Error initializing SignalR: {ex.Message}";
-            }
-        }
-    }
-
-    private static Home? Instance;
-
-
-    protected override void OnInitialized()
-    {
-        Instance = this;
-    }
-
-    [JSInvokable]
-    public static void OnPlayerJoined(string player)
-    {
-        if (Instance != null)
-        {
-            Instance.StatusMessage = $"{player} has joined the game!";
-            Instance.InvokeAsync(Instance.StateHasChanged); // Update UI
-        }
-    }
-
     private async Task JoinGame()
     {
-        if (string.IsNullOrWhiteSpace(JoinCode) || string.IsNullOrWhiteSpace(Name))
+        if (string.IsNullOrWhiteSpace(GameId) || string.IsNullOrWhiteSpace(Name))
         {
             StatusMessage = "Please fill out both fields.";
             return;
@@ -80,10 +46,18 @@
 
         try
         {
-            // Call the JavaScript function `invokeHubMethod` to invoke the SignalR hub method
-            await JS.InvokeVoidAsync("invokeHubMethod", "JoinGame", JoinCode, Name);
-            StatusMessage = "Successfully joined the game!";
-            NavigationManager.NavigateTo($"/Lobby?joinCode={Uri.EscapeDataString(JoinCode)}&name={Uri.EscapeDataString(Name)}");
+            if (gameService.IsValidGameId(GameId))
+            {
+                await JS.InvokeVoidAsync("setCookie", "Name", Name);
+                await JS.InvokeVoidAsync("setCookie", "GameId", GameId);
+
+                gameService.JoinGame(GameId, Name);
+                NavigationManager.NavigateTo("/Lobby");
+            }
+            else
+            {
+                StatusMessage = "Invalid join code!";
+            }
         }
         catch (Exception ex)
         {

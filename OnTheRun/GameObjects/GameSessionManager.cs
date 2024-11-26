@@ -7,12 +7,21 @@ namespace OnTheRun.GameObjects
     {
         private readonly ConcurrentDictionary<string, GameSession> _sessions = new();
 
+
         public string CreateGame()
         {
             var gameId = GenerateGameId();
             var session = new GameSession(gameId);
             _sessions[gameId] = session;
             return gameId;
+        }
+
+        public GameSession CreateGameSession()
+        {
+            var gameId = GenerateGameId();
+            var session = new GameSession(gameId);
+            _sessions[gameId] = session;
+            return session;
         }
 
         public GameSession? GetGame(string gameId) =>

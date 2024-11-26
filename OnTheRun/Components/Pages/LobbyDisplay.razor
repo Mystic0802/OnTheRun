@@ -1,0 +1,29 @@
+﻿<h3>LobbyDisplay</h3>
+<div>
+    <h4>Players</h4>
+    <ul id="playerList">
+        @foreach (var player in Game.Players)
+        {
+            <li>@player.Name</li>
+        }
+    </ul>
+
+    <h4>Chasers</h4>
+    <ul id="chaserList">
+        @if (Game.Chaser != null)
+        {
+            <li>@Game.Chaser.Name</li>
+        }
+    </ul>
+</div>
+
+
+@code {
+    [Parameter]
+    public GameSession Game { get; set; }
+
+    protected override void OnInitialized()
+    {
+        //Game.OnGameSessionChanged += StateHasChanged;
+    }
+}

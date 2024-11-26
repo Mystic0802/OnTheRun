@@ -1,29 +1,51 @@
 ﻿@page "/Lobby"
 
+@inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+@inject GameSessionManager gameSessionManager
 
 <h3>Lobby</h3>
 <p>Welcome, @Name!</p>
-<p>Join Code: @JoinCode</p>
+<p>Join Code: @GameId</p>
 
-<p class="validation-error">@ErrorMessage</p>
+<button @onclick="OnSwitchTeamClick">Switch Team</button>
+
+<p>@ErrorMessage</p>
 
 @code {
-    [Parameter]
-    public string JoinCode { get; set; } = string.Empty;
 
-    [Parameter]
-    public string Name { get; set; } = string.Empty;
+    public string GameId { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
+    public GameSession? Game {get; private set; }
 
     private string ErrorMessage { get; set; } = string.Empty;
+    private static Lobby? Instance;
 
-    protected override void OnParametersSet()
+    protected override async Task OnInitializedAsync()
     {
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        Console.WriteLine("OnInitialized called");
+        Instance = this;
+        Name = await JS.InvokeAsync<string>("getCookie", "Name");
+        GameId = await JS.InvokeAsync<string>("getCookie", "GameId");
 
-        JoinCode = query["joinCode"] ?? string.Empty;
-        Name = query["name"] ?? string.Empty;
+        if (!string.IsNullOrEmpty(GameId))
+        {
+            Game = gameSessionManager.GetGame(GameId);
+            if (Game != null)
+                return;
+        }
+        NavigationManager.NavigateTo("/Home");
+    }
 
+    private void OnSwitchTeamClick()
+    {
+        try
+        {
+            Game.SwitchTeam(Name);
+        }
+        catch(Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 }

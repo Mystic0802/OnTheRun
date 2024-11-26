@@ -5,41 +5,44 @@ namespace OnTheRun.GameObjects.Services
 {
     public class GameService
     {
-        private readonly IHubContext<GameHub> _hubContext;
-        private readonly GameSessionManager _gameSessionManager;
+        //private readonly IHubContext<GameHub> _hubContext;
+        private readonly GameSessionManager gameSessionManager;
 
-        public GameService(IHubContext<GameHub> hubContext, GameSessionManager gameSessionManager)
+        //public GameService(IHubContext<GameHub> hubContext, GameSessionManager gameSessionManager)
+        //{
+        //    _hubContext = hubContext;
+        //    _gameSessionManager = gameSessionManager;
+        //}
+
+        public GameService(GameSessionManager gameSessionManager)
         {
-            _hubContext = hubContext;
-            _gameSessionManager = gameSessionManager;
+            this.gameSessionManager = gameSessionManager;
         }
 
-        public async Task SwitchTeam(string gameId, string playerName, bool isChaser = false)
+        public bool IsValidGameId(string gameId)
         {
-            var gameSession = _gameSessionManager.GetGame(gameId);
+            return gameSessionManager.GetGame(gameId) != null;
+        }
+
+        public void JoinGame(string gameId, string playerName)
+        {
+            var gameSession = gameSessionManager.GetGame(gameId);
             if (gameSession == null)
                 throw new HubException("Game not found.");
 
-            if (!gameSession.Players.Any())
-                throw new HubException("No players found.");
+            if (gameSession.CurrentState != GameState.Lobby)
+                throw new HubException("Game has started");
 
-            var player = gameSession.Players.FirstOrDefault(p => p.Name == playerName, null);
-            if (player == null)
-                throw new HubException($"'{playerName}' not found");
+            Player player;
+            lock (gameSession)
+            {
+                if (gameSession.Players.Count() >= gameSession.MaxPlayers)
+                    throw new HubException("Max players reached.");
 
-
-            player.IsChaser = isChaser;
-            await _hubContext.Clients.Group(gameId).SendAsync("SwitchTeam", player);
-        }
-
-        public async Task StartGame(string gameId)
-        {
-            var gameSession = _gameSessionManager.GetGame(gameId);
-            if (gameSession == null)
-                throw new HubException("Game not found.");
-
-            gameSession.StartGame();
-            await _hubContext.Clients.Group(gameId).SendAsync("GameStarted");
+                player = new Player(playerName);
+                gameSession.AddPlayer(player);
+            }
+            //await _hubContext.Clients.Group(gameId).SendAsync("GameStarted");
         }
     }
 }

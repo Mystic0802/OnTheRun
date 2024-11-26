@@ -14,11 +14,12 @@
     <!-- Include SignalR library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
     <!-- Include signalr.js -->
-    <script src="signalr.js"></script>
+    <script src="js/signalr.js"></script>
+    <script src="js/CookieStorageAccessor.js"></script>
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="new InteractiveServerRenderMode(prerender:false)" />
     <script src="_framework/blazor.web.js"></script>
 </body>
 

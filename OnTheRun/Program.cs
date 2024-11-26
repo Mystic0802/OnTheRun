@@ -1,5 +1,6 @@
 using OnTheRun.Components;
 using OnTheRun.GameObjects;
+using OnTheRun.GameObjects.Services;
 
 namespace OnTheRun
 {
@@ -13,15 +14,13 @@ namespace OnTheRun
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            builder.Services.AddServerSideBlazor()
+                .AddCircuitOptions(options => options.DetailedErrors = true); // DEVELOPMENT ONLY
+
             builder.Services.AddSingleton<GameSessionManager>();
+            builder.Services.AddSingleton<GameService>();
 
             var app = builder.Build();
-
-            var gameSessionManager = app.Services.GetRequiredService<GameSessionManager>();
-            var gameId = gameSessionManager.CreateGame();
-            Console.WriteLine(gameId);
-
-            app.MapHub<GameHub>("/gamehub");
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
