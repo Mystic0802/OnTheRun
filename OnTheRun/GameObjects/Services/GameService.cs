@@ -5,28 +5,44 @@ namespace OnTheRun.GameObjects.Services
 {
     public class GameService
     {
-        private readonly IHubContext<GameHub> _hubContext;
-        private readonly GameSessionManager _gameSessionManager;
+        //private readonly IHubContext<GameHub> _hubContext;
+        private readonly GameSessionManager gameSessionManager;
 
-        public GameService(IHubContext<GameHub> hubContext, GameSessionManager gameSessionManager)
+        //public GameService(IHubContext<GameHub> hubContext, GameSessionManager gameSessionManager)
+        //{
+        //    _hubContext = hubContext;
+        //    _gameSessionManager = gameSessionManager;
+        //}
+
+        public GameService(GameSessionManager gameSessionManager)
         {
-            _hubContext = hubContext;
-            _gameSessionManager = gameSessionManager;
+            this.gameSessionManager = gameSessionManager;
         }
 
         public bool IsValidGameId(string gameId)
         {
-            return _gameSessionManager.GetGame(gameId) != null;
+            return gameSessionManager.GetGame(gameId) != null;
         }
 
-        public async Task StartGame(string gameId)
+        public void JoinGame(string gameId, string playerName)
         {
-            var gameSession = _gameSessionManager.GetGame(gameId);
+            var gameSession = gameSessionManager.GetGame(gameId);
             if (gameSession == null)
                 throw new HubException("Game not found.");
 
-            gameSession.StartGame();
-            await _hubContext.Clients.Group(gameId).SendAsync("GameStarted");
+            if (gameSession.CurrentState != GameState.Lobby)
+                throw new HubException("Game has started");
+
+            Player player;
+            lock (gameSession)
+            {
+                if (gameSession.Players.Count() >= gameSession.MaxPlayers)
+                    throw new HubException("Max players reached.");
+
+                player = new Player(playerName);
+                gameSession.AddPlayer(player);
+            }
+            //await _hubContext.Clients.Group(gameId).SendAsync("GameStarted");
         }
     }
 }

@@ -12,6 +12,8 @@ namespace OnTheRun.GameObjects
         public int MaxPlayers { get; } = 5;
         public GameState CurrentState { get; private set; } = GameState.Lobby;
 
+        public event Action? OnGameSessionChanged;
+
         public GameSession(string gameId)
         {
             GameId = gameId;
@@ -25,6 +27,7 @@ namespace OnTheRun.GameObjects
                 throw new InvalidOperationException("Player already in game.");
 
             Players.Add(player);
+            OnGameSessionChanged?.Invoke();
         }
 
         public void RemovePlayer(Player player)
@@ -32,19 +35,29 @@ namespace OnTheRun.GameObjects
             if (!Players.Any())
                 throw new InvalidOperationException("No other players exist.");
             Players.Remove(player);
+            OnGameSessionChanged?.Invoke();
         }
 
-        public Player SwitchTeam(string playerName)
+        public void SwitchTeam(string playerName)
         {
             Player? player = null;
 
-            if (Chaser != null && Chaser.Name == playerName)
+            if (Chaser != null)
             {
-                player = Chaser;
-                player.IsChaser = false;
-                Players.Add(player);
-                Chaser = null;
-                return player;
+                if (Chaser.Name == playerName) // Player is existing chaser: Switch back to player
+                {
+
+                    player = Chaser;
+                    player.IsChaser = false;
+                    Players.Add(player);
+                    Chaser = null;
+                    OnGameSessionChanged?.Invoke();
+                    return;
+                }
+                else // Player is not existing chaser: do not change anything.
+                {
+                    throw new InvalidOperationException("Chaser slot already taken.");
+                }    
             }
 
             player = Players.FirstOrDefault(p => p.Name == playerName, null);
@@ -56,8 +69,8 @@ namespace OnTheRun.GameObjects
             Players.Remove(player);
             player.IsChaser = true;
             Chaser = player;
-
-            return Chaser;
+            OnGameSessionChanged?.Invoke();
+            return;
         }
 
         #endregion
@@ -69,17 +82,6 @@ namespace OnTheRun.GameObjects
 
             CurrentState = GameState.Cashbuilder;
         }
-
-        private readonly IHubContext<GameHub> _hubContext;
-        public GameSession(IHubContext<GameHub> hubContext)
-        {
-            _hubContext = hubContext;
-        }
-
-        public async Task DoSomethingOnHub()
-        {
-        }
-
     }
 
     public enum GameState

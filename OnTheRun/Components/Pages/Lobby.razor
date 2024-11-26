@@ -1,126 +1,51 @@
 ﻿@page "/Lobby"
-@using OnTheRun.GameObjects
 
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+@inject GameSessionManager gameSessionManager
 
 <h3>Lobby</h3>
 <p>Welcome, @Name!</p>
 <p>Join Code: @GameId</p>
-
-<div>
-    <h4>Players</h4>
-    <ul id="playerList">
-        @foreach (var player in Players)
-        {
-            <li>@player.Name</li>
-        }
-    </ul>
-
-    <h4>Chasers</h4>
-    <ul id="chaserList">
-        @if (Chaser != null)
-        {
-            <li>@Chaser.Name</li>
-        }
-    </ul>
-</div>
 
 <button @onclick="OnSwitchTeamClick">Switch Team</button>
 
 <p>@ErrorMessage</p>
 
 @code {
-    [Parameter]
-    public string GameId { get; set; } = string.Empty;
 
-    [Parameter]
-    public string Name { get; set; } = string.Empty;
+    public string GameId { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
+    public GameSession? Game {get; private set; }
 
     private string ErrorMessage { get; set; } = string.Empty;
-
-    private List<Player> Players { get; set; } = new List<Player>();
-    private Player? Chaser { get; set; }
-
     private static Lobby? Instance;
 
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("OnInitializedAsync called");
+        Console.WriteLine("OnInitialized called");
         Instance = this;
-
         Name = await JS.InvokeAsync<string>("getCookie", "Name");
         GameId = await JS.InvokeAsync<string>("getCookie", "GameId");
 
-        // Request the initial game state for this player
-        await JS.InvokeVoidAsync("invokeHubMethod", "GetGameState", GameId);
+        if (!string.IsNullOrEmpty(GameId))
+        {
+            Game = gameSessionManager.GetGame(GameId);
+            if (Game != null)
+                return;
+        }
+        NavigationManager.NavigateTo("/Home");
     }
 
-    // For new players joining, this is almost always called before the page is initialised.
-    [JSInvokable]
-    public static void OnPlayerJoined(Player player, List<Player> players)
+    private void OnSwitchTeamClick()
     {
-        if (Instance != null)
+        try
         {
-            Instance.ErrorMessage = $"{player.Name} has joined the game!";
-            Instance.Players = players;
-            Instance.InvokeAsync(Instance.StateHasChanged);
+            Game.SwitchTeam(Name);
         }
-    }
-
-    private async Task OnSwitchTeamClick() =>
-        await JS.InvokeVoidAsync("invokeHubMethod", "SwitchTeam", GameId, Name);
-
-    [JSInvokable]
-    public static void OnPlayerUpdated(Player player, string update)
-    {
-        if (Instance == null) return;
-
-        Console.WriteLine($"OnPlayerUpdated called on {Instance.Name}'s browser");
-        Console.WriteLine($"{Instance.Name}: Update type: {update}");
-        Console.WriteLine($"{Instance.Name}: Player before update: {player.Name}, IsChaser: {player.IsChaser}");
-        Console.WriteLine($"{Instance.Name}: Player list before update:");
-        foreach(var p in Instance.Players)
+        catch(Exception ex)
         {
-            Console.WriteLine($"{p.Id}, {p.Name}, {p.Name}");
-        }
-        Console.WriteLine($"{Instance.Name}: Chaser before update: {Instance.Chaser}");
-
-        if (update == "SwitchTeam")
-        {
-            if (player.IsChaser)
-            {
-                Console.WriteLine($"{Instance.Name}: Switching player to chaser...");
-                Instance.Players.Remove(player); // Ensure the comparison is valid (check Player equality)
-                Instance.Chaser = player;
-            }
-            else
-            {
-                Console.WriteLine($"{Instance.Name}: Switching player to player list...");
-                Instance.Chaser = null;
-                Instance.Players.Add(player);
-            }
-        }
-
-        Console.WriteLine($"{Instance.Name}: Player after update: {player.Name}, IsChaser: {player.IsChaser}");
-        Console.WriteLine($"{Instance.Name}: Player list after update:");
-        foreach (var p in Instance.Players)
-        {
-            Console.WriteLine($"{p.Id}, {p.Name}, {p.Name}");
-        }
-        Console.WriteLine($"{Instance.Name}: Chaser after update: {Instance.Chaser}");
-
-        Instance.InvokeAsync(Instance.StateHasChanged);
-    }
-
-    [JSInvokable]
-    public static void OnInitialiseGameState(List<Player> players, Player chaser)
-    {
-        if (Instance != null)
-        {
-            Instance.Players = players;
-            Instance.Chaser = chaser;
-            Instance.StateHasChanged();
+            ErrorMessage = ex.Message;
         }
     }
 }

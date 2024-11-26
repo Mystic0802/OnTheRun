@@ -20,8 +20,6 @@ async function startConnection(hubUrl) {
         console.error("SignalR connection failed: ", err);
         setTimeout(() => startConnection(hubUrl), 5000);
     }
-
-    //return connection;
 }
 
 async function invokeHubMethod(methodName, ...args) {

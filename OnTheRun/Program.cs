@@ -22,12 +22,6 @@ namespace OnTheRun
 
             var app = builder.Build();
 
-            var gameSessionManager = app.Services.GetRequiredService<GameSessionManager>();
-            var gameId = gameSessionManager.CreateGame();
-            Console.WriteLine(gameId);
-
-            app.MapHub<GameHub>("/gamehub");
-
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {

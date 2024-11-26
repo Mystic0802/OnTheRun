@@ -33,7 +33,6 @@
 
     private bool IsJoinDisabled => string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(GameId);
 
-    //private IJSObjectReference? _hubConnection;
     private bool _isInitialized = false;
 
 
@@ -49,11 +48,10 @@
         {
             if (gameService.IsValidGameId(GameId))
             {
-                await StartConnection();
-
                 await JS.InvokeVoidAsync("setCookie", "Name", Name);
                 await JS.InvokeVoidAsync("setCookie", "GameId", GameId);
-                await JS.InvokeVoidAsync("invokeHubMethod", "JoinGame", GameId, Name);
+
+                gameService.JoinGame(GameId, Name);
                 NavigationManager.NavigateTo("/Lobby");
             }
             else
@@ -64,23 +62,6 @@
         catch (Exception ex)
         {
             StatusMessage = $"Error: {ex.Message}";
-        }
-    }
-
-    private async Task StartConnection()
-    {
-        if (!_isInitialized)
-        {
-            try
-            {
-                //_hubConnection = 
-                await JS.InvokeAsync<IJSObjectReference>("startConnection", "/gamehub");
-                _isInitialized = true;
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Error initializing SignalR: {ex.Message}";
-            }
         }
     }
 }

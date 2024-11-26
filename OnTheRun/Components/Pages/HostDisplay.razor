@@ -1,0 +1,37 @@
+﻿<!-- Display.razor -->
+@page "/display"
+
+@inject GameSessionManager gameSessionManager
+
+<h1>Display Host</h1>
+@if (displayLobby)
+{
+    <LobbyDisplay Game="Game"/>
+}
+
+@code {
+    private bool displayLobby = false;
+    private HostDisplay Instance;
+    public GameSession? Game { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if(Instance is null)
+        {
+            Instance = this;
+        }
+
+        if (Game is null)
+        {
+            Game = gameSessionManager.CreateGameSession();
+            Console.WriteLine(Game.GameId);
+            Game.OnGameSessionChanged += OnGameSessionChanged;
+            displayLobby = true;
+        }
+    }
+
+    private void OnGameSessionChanged()
+    {
+        Instance.InvokeAsync(Instance.StateHasChanged);
+    }
+}
