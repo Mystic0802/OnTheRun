@@ -8,7 +8,7 @@ namespace OnTheRun.GameObjects
 
         public string GameId { get; }
         public List<Player> Players { get; } = new();
-        public Player Chaser { get; private set; }
+        public Player? Chaser { get; private set; }
         public int MaxPlayers { get; } = 5;
         public GameState CurrentState { get; private set; } = GameState.Lobby;
 
@@ -34,22 +34,30 @@ namespace OnTheRun.GameObjects
             Players.Remove(player);
         }
 
-        public void SetChaser(Player player)
+        public Player SwitchTeam(string playerName)
         {
-            if (Chaser == player)
-                throw new InvalidOperationException("Player is already the Chaser.");
+            Player? player = null;
 
-            if(!Players.Contains(player))
-                throw new InvalidOperationException("Player is not in this game session.");
-
-            if(Chaser != null)
+            if (Chaser != null && Chaser.Name == playerName)
             {
-                Chaser.IsChaser = false;
-                Players.Add(Chaser);
+                player = Chaser;
+                player.IsChaser = false;
+                Players.Add(player);
+                Chaser = null;
+                return player;
             }
+
+            player = Players.FirstOrDefault(p => p.Name == playerName, null);
+            if (player == null)
+            {
+                throw new InvalidOperationException("Player is not in this game session.");
+            }
+
             Players.Remove(player);
             player.IsChaser = true;
             Chaser = player;
+
+            return Chaser;
         }
 
         #endregion

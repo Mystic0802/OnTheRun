@@ -57,22 +57,18 @@ namespace OnTheRun.GameObjects
 
         public async Task SwitchTeam(string gameId, string playerName)
         {
-            var gameSession = _gameSessionManager.GetGame(gameId);
-            if (gameSession == null)
-                throw new HubException("Game not found.");
+            var gameSession = _gameSessionManager.GetGame(gameId) ?? throw new HubException("Game not found.");
 
             if (!gameSession.Players.Any())
                 throw new HubException("No players found.");
 
-
-
-            var player = gameSession.Players.FirstOrDefault(p => p.Name == playerName, null) ?? throw new HubException($"'{playerName}' not found");
+            Player? player = null;
 
             lock (gameSession)
             {
-                gameSession.SetChaser(player);
-
+                player = gameSession.SwitchTeam(playerName);
             }
+
             await Clients.Group(gameId).SendAsync("PlayerUpdated", player, "SwitchTeam");
         }
 

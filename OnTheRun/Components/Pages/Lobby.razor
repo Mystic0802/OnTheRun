@@ -76,23 +76,41 @@
     {
         if (Instance == null) return;
 
+        Console.WriteLine($"OnPlayerUpdated called on {Instance.Name}'s browser");
+        Console.WriteLine($"{Instance.Name}: Update type: {update}");
+        Console.WriteLine($"{Instance.Name}: Player before update: {player.Name}, IsChaser: {player.IsChaser}");
+        Console.WriteLine($"{Instance.Name}: Player list before update:");
+        foreach(var p in Instance.Players)
+        {
+            Console.WriteLine($"{p.Id}, {p.Name}, {p.Name}");
+        }
+        Console.WriteLine($"{Instance.Name}: Chaser before update: {Instance.Chaser}");
+
         if (update == "SwitchTeam")
         {
-
             if (player.IsChaser)
             {
-                Instance.Players.Remove(player);
+                Console.WriteLine($"{Instance.Name}: Switching player to chaser...");
+                Instance.Players.Remove(player); // Ensure the comparison is valid (check Player equality)
                 Instance.Chaser = player;
             }
             else
             {
+                Console.WriteLine($"{Instance.Name}: Switching player to player list...");
                 Instance.Chaser = null;
                 Instance.Players.Add(player);
             }
-            Instance.InvokeAsync(Instance.StateHasChanged);
-
-            // Note to self: Currently only the browser the button is pressed on gets the updated team. Instance doesn't seem to work as expected.
         }
+
+        Console.WriteLine($"{Instance.Name}: Player after update: {player.Name}, IsChaser: {player.IsChaser}");
+        Console.WriteLine($"{Instance.Name}: Player list after update:");
+        foreach (var p in Instance.Players)
+        {
+            Console.WriteLine($"{p.Id}, {p.Name}, {p.Name}");
+        }
+        Console.WriteLine($"{Instance.Name}: Chaser after update: {Instance.Chaser}");
+
+        Instance.InvokeAsync(Instance.StateHasChanged);
     }
 
     [JSInvokable]
