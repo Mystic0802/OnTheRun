@@ -1,6 +1,6 @@
 ﻿namespace OnTheRun.GameObjects.Rounds
 {
-    public class HeadToHead
+    public class FinalChaseService
     {
     }
 }

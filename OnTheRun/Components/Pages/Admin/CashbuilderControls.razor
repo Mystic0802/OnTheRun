@@ -1,0 +1,178 @@
+﻿<h3>CashbuilderControls</h3>
+
+<div class="admin-page">
+    <!-- Timer Panel -->
+    <section class="section" id="timer-panel">
+        <h4>Timer Panel</h4>
+        <label for="timer-display">Timer (remaining time):</label>
+        <input type="text" id="timer-display" value="@DisplayTime" readonly>
+        <div class="buttons-row">
+            <button id="start-timer" @onclick="StartTimer" disabled="@IsTimerRunning">Start</button>
+            <button id="pause-timer" @onclick="PauseTimer" disabled="@(IsTimerPaused || !IsTimerRunning)">Pause</button>
+            <button id="reset-timer" @onclick="StopTimer">Reset</button>
+        </div>
+    </section>
+
+
+    <!-- Question Panel -->
+    <section class="section" id="question-panel">
+        <h4>Question Panel</h4>
+        <label for="question-text">Question:</label>
+        <textarea id="question-text" rows="3" cols="50" >@QuestionText</textarea>
+        <div class="buttons-row">
+            <div class="action-button">
+                <button id="correct-answer" style="width: 100px; height: 50px;" @onclick="OnCorrectAnswerClick">Correct</button>
+                <button id="undo-correct">-</button>
+            </div>
+            <div class="action-button">
+                <button id="incorrect-answer" style="width: 100px; height: 50px;" @onclick="OnIncorrectAnswerClick">Incorrect</button>
+                <button id="undo-incorrect">-</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+@code {
+    private CashbuilderControls? Instance;
+    private System.Timers.Timer? UpdateTimer;
+    private bool IsTimerRunning;
+    private bool IsTimerPaused;
+    private string DisplayTime = "00:00";
+    private string QuestionText;
+    private string playerName;
+
+    [Parameter]
+    public GameSession Game { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Instance = this;
+        Game.CashbuilderService.OnCashbuilderTimerStart += OnTimerStart;
+        Game.CashbuilderService.OnCashbuilderTimerPause += OnTimerPause;
+        Game.CashbuilderService.OnCashbuilderTimerStop += OnTimerStop;
+        Game.CashbuilderService.OnCashbuilderTimerEnd += OnTimerEnd;
+
+        // Timer to update the display in real-time
+        UpdateTimer = new System.Timers.Timer(100);
+        UpdateTimer.Elapsed += UpdateDisplay;
+
+        playerName = Game.Players[Game.CurrentPlayerIndex].Name;
+    }
+
+    #region Timer
+
+    private void StartTimer()
+    {
+        Game.CashbuilderService.StartTimer();
+        IsTimerPaused = false;
+        IsTimerRunning = true;
+        UpdateTimer.Start();
+    }
+
+    private void PauseTimer()
+    {
+        Game.CashbuilderService.PauseTimer();
+        IsTimerPaused = true;
+        IsTimerRunning = false;
+        UpdateTimer.Stop();
+    }
+
+    private void StopTimer()
+    {
+        Game.CashbuilderService.StopTimer();
+        IsTimerPaused = false;
+        IsTimerRunning = false;
+        UpdateTimer.Stop();
+    }
+
+    private void OnTimerStart()
+    {
+        InvokeAsync(() =>
+        {
+            IsTimerRunning = true;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private void OnTimerPause()
+    {
+        InvokeAsync(() =>
+        {
+            IsTimerRunning = false;
+            IsTimerPaused = true;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private void OnTimerStop()
+    {
+        InvokeAsync(() =>
+        {
+            IsTimerRunning = false;
+            IsTimerPaused = false;
+            DisplayTime = "00:00";
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private void OnTimerEnd()
+    {
+        InvokeAsync(() =>
+        {
+            IsTimerRunning = false;
+            IsTimerPaused = false;
+            DisplayTime = "00:00";
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private void UpdateDisplay(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        if (Game.CashbuilderService.IsTimeUp())
+        {
+            StopTimer();
+        }
+
+        DisplayTime = FormatTime(Game.CashbuilderService.RemainingTime);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string FormatTime(TimeSpan time)
+    {
+        return $"{time.Minutes:D2}:{time.Seconds:D2}";
+    }
+
+    #endregion
+
+    private void OnCorrectAnswerClick()
+    {
+        Game.CashbuilderService.AnswerQuestion(playerName ,true);
+        GetNextQuestion();
+    }
+
+    private void OnIncorrectAnswerClick()
+    {
+        Game.CashbuilderService.AnswerQuestion(playerName, false);
+        GetNextQuestion();
+    }
+
+    private void GetNextQuestion()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    // public override void Dispose()
+    // {
+    //     base.Dispose();
+    //     Game.CashbuilderService.OnCashbuilderTimerStart -= OnTimerStart;
+    //     Game.CashbuilderService.OnCashbuilderTimerPause -= OnTimerPause;
+    //     Game.CashbuilderService.OnCashbuilderTimerStop -= OnTimerStop;
+    //     Game.CashbuilderService.OnCashbuilderTimerEnd -= OnTimerEnd;
+
+    //     if (UpdateTimer != null)
+    //     {
+    //         UpdateTimer.Stop();
+    //         UpdateTimer.Dispose();
+    //     }
+    // }
+}

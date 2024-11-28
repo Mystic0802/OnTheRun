@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using OnTheRun.GameObjects.Rounds;
+using OnTheRun.GameObjects.Services;
 using System.Collections.Concurrent;
 
 namespace OnTheRun.GameObjects
@@ -9,14 +11,21 @@ namespace OnTheRun.GameObjects
         public string GameId { get; }
         public List<Player> Players { get; } = new();
         public Player? Chaser { get; private set; }
-        public int MaxPlayers { get; } = 5;
+        public int MaxPlayers { get; } = 4;
         public GameState CurrentState { get; private set; } = GameState.Lobby;
+        public int CurrentPlayerIndex { get; private set; } = 0;
+        public CashbuilderService CashbuilderService { get; }
+        public HeadToHeadService HeadToHeadService { get; }
+        public FinalChaseService FinalChaseService { get; }
 
         public event Action? OnGameSessionChanged;
 
         public GameSession(string gameId)
         {
             GameId = gameId;
+            CashbuilderService = new CashbuilderService();
+            HeadToHeadService = new HeadToHeadService(new QuestionService());
+            FinalChaseService = new FinalChaseService();
         }
 
         #region players
@@ -80,7 +89,59 @@ namespace OnTheRun.GameObjects
             if (CurrentState != GameState.Lobby)
                 throw new InvalidOperationException("Game already started.");
 
+            if (!Players.Any())
+            {
+                throw new InvalidOperationException("No players in the game.");
+            }
+
             CurrentState = GameState.Cashbuilder;
+            CurrentPlayerIndex = 0;
+            OnGameSessionChanged?.Invoke();
+        }
+
+        public void EndGame()
+        {
+            if (CurrentState == GameState.Lobby)
+                throw new InvalidOperationException("Game has not started.");
+            else if (CurrentState == GameState.Ended)
+                throw new InvalidOperationException("Game has already ended.");
+
+            CurrentState = GameState.Lobby;
+            OnGameSessionChanged?.Invoke();
+        }
+
+        public void NextRound()
+        {
+            switch (CurrentState)
+            {
+                case GameState.Lobby:
+                    throw new InvalidOperationException("Game has not started.");
+                case GameState.Cashbuilder:
+                    CurrentState = GameState.HeadToHead;
+                    break;
+                case GameState.HeadToHead:
+                    if (CurrentPlayerIndex < MaxPlayers - 1)
+                    {
+                        CurrentPlayerIndex++;
+                        CurrentState = GameState.Cashbuilder;
+                    }
+                    else
+                    {
+                        CurrentState = GameState.FinalChase;
+                    }
+                    break;
+                case GameState.FinalChase:
+                    CurrentState = GameState.Ended;
+                    break;
+                case GameState.Ended:
+                    throw new InvalidOperationException("Game has ended.");
+            }
+            OnGameSessionChanged?.Invoke();
+        }
+
+        public void StartRound()
+        {
+
         }
     }
 

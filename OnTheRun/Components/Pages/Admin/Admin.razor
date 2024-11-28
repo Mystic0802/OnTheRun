@@ -1,0 +1,109 @@
+﻿@page "/admin"
+@inject GameService gameService
+@inject GameSessionManager gameSessionManager
+@inject GameSession gameSession
+
+<h3>Admin</h3>
+
+@if(Game is null)
+{
+    <div>
+        <label for="joinCode">Enter Join Code:</label>
+        <input id="joinCode" @bind="GameId" @bind:event="oninput" placeholder="e.g., ABCD" />
+    </div>
+
+    <button @onclick="JoinAdmin">Join</button>
+}
+else @if (Game.CurrentState == GameState.Lobby)
+{
+    <LobbyDisplay Game="Game" />
+    <button @onclick="OnStartClick">Start Game</button>
+}
+else if (Game.CurrentState == GameState.Cashbuilder)
+{
+    <CashbuilderControls Game="Game"/>
+}
+else if (Game.CurrentState == GameState.HeadToHead)
+{
+    <HeadToHead Game="Game"/>
+}
+else if (Game.CurrentState == GameState.FinalChase)
+{
+    <FinalChaser Game="Game"/>
+}
+else if (Game.CurrentState == GameState.Ended)
+{
+    <button @onclick="OnEndClick">End Game</button>
+}
+
+<button @onclick="OnNextRoundClick">Next Round</button>
+
+@code {
+    private string GameId = string.Empty;
+    private Admin? Instance;
+
+    public GameSession Game { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Instance = this;
+    }
+
+    private async Task JoinAdmin()
+    {
+        try
+        {
+            if (gameService.IsValidGameId(GameId))
+            {
+                Game = gameSessionManager.GetGame(GameId);
+                Game.OnGameSessionChanged += OnGameSessionChanged;
+                await Instance.InvokeAsync(Instance.StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+    private void OnStartClick()
+    {
+        try
+        {
+            Game.StartGame();
+        }
+        catch(Exception ex)
+        {
+
+        }
+    }
+
+    private void OnEndClick()
+    {
+        try
+        {
+            Game.EndGame();
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+    private void OnNextRoundClick()
+    {
+        try
+        {
+            Game.NextRound();
+        }
+        catch(Exception ex)
+        {
+            
+        }
+    }
+
+    private void OnGameSessionChanged()
+    {
+        Instance.InvokeAsync(Instance.StateHasChanged);
+    }
+}
